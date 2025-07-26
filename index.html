@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPatriarch</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            /* Removed display: flex; justify-content: center; align-items: center; */
+            /* Instead, center the content-card-style elements using margin: auto */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center; /* To center block elements */
+            min-height: 100vh; /* Ensure body takes full height */
+        }
+        .content-card-style { /* New class for common card styling */
+            background-color: #ffffff;
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            position: relative;
+            min-height: 300px; /* Added for visibility */
+            box-sizing: border-box;
+            margin-left: auto; /* Center horizontally */
+            margin-right: auto; /* Center horizontally */
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            margin: auto;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: 450px;
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #cbd5e0; /* Light gray border */
+            border-radius: 0.5rem;
+            box-sizing: border-box; /* Changed from border to border-box for consistent sizing */
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo 600 */
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Indigo 700 */
+        }
+        .btn-secondary {
+            background-color: #e2e8f0; /* Gray 200 */
+            color: #475569; /* Slate 700 */
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0; /* Gray 300 */
+        }
+        .message-box {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            min-width: 250px;
+            max-width: 90%;
+        }
+        .message-box button {
+            margin-top: 15px;
+        }
+        .loading-spinner {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none !important; /* Adding !important to ensure it overrides other display properties */
+        }
+        .profile-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .profile-card:hover {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Initial Welcome/Login Screen -->
+    <div id="initial-content-wrapper" class="content-card-style">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome to MyPatriarch</h1>
+        <p class="text-lg text-gray-600 mb-8">Click here to Login</p>
+        <button id="show-login-btn-initial" class="btn-primary px-8 py-3 text-xl">Login</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('login-modal', 'initial-content-wrapper')">&times;</span>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Family Login</h2>
+            <input type="email" id="login-email" placeholder="Family Email" required>
+            <input type="password" id="login-password" placeholder="Family Password" required>
+            <button id="login-submit-btn" class="btn-primary w-full mb-2">Login</button>
+            <button id="login-back-btn" class="btn-secondary w-full">Go Back</button>
+            <p id="login-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+            <div id="login-loading-spinner" class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Profile Selection Modal (New Screen) -->
+    <div id="profile-selection-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="handleLogout()">&times;</span> <!-- Logout from here -->
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Select Your Profile</h2>
+            <div id="profiles-list" class="space-y-4 mb-6">
+                <!-- Profiles will be dynamically loaded here -->
+                <p id="no-profiles-message" class="text-gray-500">No profiles found. Create one below!</p>
+            </div>
+            <button id="create-profile-btn" class="btn-primary w-full">Create New Profile</button>
+            <div id="profile-selection-loading-spinner" class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Create Profile Modal -->
+    <div id="create-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('create-profile-modal', 'profile-selection-modal')">&times;</span>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Create New Profile</h2>
+            <input type="text" id="new-profile-name" placeholder="Profile Name (e.g., John, Jane)" required>
+            <input type="password" id="new-profile-pin" placeholder="Set a 4-digit PIN" maxlength="4" required>
+            <input type="password" id="confirm-new-profile-pin" placeholder="Confirm PIN" maxlength="4" required>
+            <button id="submit-create-profile-btn" class="btn-primary w-full mb-2">Create Profile</button>
+            <button id="back-to-profile-selection-btn" class="btn-secondary w-full">Go Back</button>
+            <p id="create-profile-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+            <div id="create-profile-loading-spinner" class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Enter PIN Modal -->
+    <div id="enter-pin-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('enter-pin-modal', 'profile-selection-modal')">&times;</span>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Enter PIN for <span id="pin-profile-name"></span></h2>
+            <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="4" required>
+            <button id="submit-pin-btn" class="btn-primary w-full mb-2">Access Profile</button>
+            <button id="back-from-pin-btn" class="btn-secondary w-full">Go Back</button>
+            <p id="pin-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
+            <div id="pin-loading-spinner" class="loading-spinner"></div>
+        </div>
+    </div>
+
+
+    <!-- Main Dashboard (hidden by default) -->
+    <div id="main-dashboard" class="content-card-style hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">MyPatriarch Dashboard (<span id="current-profile-name-display"></span>)</h1>
+            <div class="flex items-center">
+                <p id="user-display-id" class="text-gray-700 mr-4"></p>
+                <button id="switch-profile-btn" class="btn-secondary mr-2">Switch Profile</button>
+                <button id="logout-btn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+
+        <!-- Financial Data Input -->
+        <div class="bg-gray-50 p-6 rounded-lg mb-8 text-left">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Inputs</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="input-income-past-two-weeks" class="block text-sm font-medium text-gray-700">Income (Past 2 Weeks)</label>
+                    <input type="number" id="input-income-past-two-weeks" placeholder="e.g., 1000" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-car-insurance" class="block text-sm font-medium text-gray-700">Car Insurance</label>
+                    <input type="number" id="input-car-insurance" placeholder="e.g., 150" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-gas-money" class="block text-sm font-medium text-gray-700">Gas Money</label>
+                    <input type="number" id="input-gas-money" placeholder="e.g., 80" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-credit-card-debt" class="block text-sm font-medium text-gray-700">Current Credit Card Debt</label>
+                    <input type="number" id="input-credit-card-debt" placeholder="e.g., 2000" class="mt-1">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Oil Change Due?</label>
+                    <div class="flex items-center space-x-4">
+                        <input type="radio" id="oil-change-yes" name="oil-change-due" value="yes" class="form-radio text-indigo-600">
+                        <label for="oil-change-yes" class="text-gray-700">Yes</label>
+                        <input type="radio" id="oil-change-no" name="oil-change-due" value="no" class="form-radio text-indigo-600" checked>
+                        <label for="oil-change-no" class="text-gray-700">No</label>
+                    </div>
+                    <div id="oil-change-input-container" class="mt-2 hidden">
+                        <label for="input-oil-change-money" class="block text-sm font-medium text-gray-700">Oil Change Money</label>
+                        <input type="number" id="input-oil-change-money" placeholder="e.g., 75" class="mt-1">
+                    </div>
+                </div>
+                <div>
+                    <label for="input-parking" class="block text-sm font-medium text-gray-700">Parking Costs</label>
+                    <input type="number" id="input-parking" placeholder="e.g., 20" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-car-wash" class="block text-sm font-medium text-gray-700">Car Wash Money</label>
+                    <input type="number" id="input-car-wash" placeholder="e.g., 15" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-fun-money" class="block text-sm font-medium text-gray-700">Fun Money</label>
+                    <input type="number" id="input-fun-money" placeholder="e.g., 100" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-zim-support" class="block text-sm font-medium text-gray-700">Zim Support</label>
+                    <input type="number" id="input-zim-support" placeholder="e.g., 50" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-offering" class="block text-sm font-medium text-gray-700">Offering</label>
+                    <input type="number" id="input-offering" placeholder="e.g., 30" class="mt-1">
+                </div>
+                <div>
+                    <label for="input-other-costs" class="block text-sm font-medium text-gray-700">Other Costs (e.g., Self Care)</label>
+                    <input type="number" id="input-other-costs" placeholder="e.g., 40" class="mt-1">
+                </div>
+            </div>
+            <button id="save-financial-data-btn" class="btn-primary mt-6 w-full">Save Financial Data</button>
+            <p id="financial-save-message" class="text-green-600 text-sm mt-2 hidden"></p>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-left mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                <p><strong>Income (Past 2 Weeks):</strong> $<span id="display-income-past-two-weeks">0.00</span></p>
+                <p><strong>Car Insurance:</strong> $<span id="display-car-insurance">0.00</span></p>
+                <p><strong>Gas Money:</strong> $<span id="display-gas-money">0.00</span></p>
+                <p><strong>Current Credit Card Debt:</strong> $<span id="display-credit-card-debt">0.00</span></p>
+                <p><strong>Oil Change Money:</strong> $<span id="display-oil-change-money">0.00</span></p>
+                <p><strong>Parking Costs:</strong> $<span id="display-parking">0.00</span></p>
+                <p><strong>Car Wash Money:</strong> $<span id="display-car-wash">0.00</span></p>
+                <p><strong>Fun Money:</strong> $<span id="display-fun-money">0.00</span></p>
+                <p><strong>Zim Support:</strong> $<span id="display-zim-support">0.00</span></p>
+                <p><strong>Offering:</strong> $<span id="display-offering">0.00</span></p>
+                <p><strong>Other Costs:</strong> $<span id="display-other-costs">0.00</span></p>
+                <p><strong>Last Updated:</strong> <span id="display-last-updated">N/A</span></p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-xl font-bold text-gray-800">Disposable Income: $<span id="display-disposable-income">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- Allocation Research -->
+        <div class="bg-gray-50 p-6 rounded-lg text-left">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Allocation Research</h3>
+            <p class="text-gray-700 mb-4">Get personalized allocation advice based on your disposable income.</p>
+            <button id="research-allocation-btn" class="btn-primary w-full">Get Allocation Advice</button>
+            <div id="research-loading-spinner" class="loading-spinner"></div>
+            <div id="allocation-result" class="mt-4 p-4 bg-white rounded-lg border border-gray-200 hidden">
+                <h4 class="font-semibold text-gray-800 mb-2">Allocation Advice:</h4>
+                <p id="allocation-text" class="text-gray-700 whitespace-pre-wrap"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initial Message Box for Firebase config -->
+    <div id="firebase-config-message" class="message-box">
+        <p class="text-lg text-gray-700">Firebase configuration is missing. Please ensure `__firebase_config` is defined.</p>
+        <button onclick="document.getElementById('firebase-config-message').style.display='none'" class="btn-primary">OK</button>
+    </div>
+
+    <!-- Message Box for general alerts -->
+    <div id="general-message-box" class="message-box">
+        <p id="general-message-text" class="text-lg text-gray-700"></p>
+        <button onclick="document.getElementById('general-message-box').style.display='none'" class="btn-primary">OK</button>
+    </div>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase config and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // HARDCODED FIREBASE CONFIGURATION AS REQUESTED
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbmW_3fHbPHV-9raz8afJidmbgDFOqmVM",
+            authDomain: "mypatriarch-b11c1.firebaseapp.com",
+            projectId: "mypatriarch-b11c1",
+            storageBucket: "mypatriarch-b11c1.firebasestorage.app",
+            messagingSenderId: "605769942473",
+            appId: "1:605769942473:web:3f04cc4392ac8e665b5418",
+            measurementId: "G-Y2G56553TY"
+        };
+        // End of HARDCODED FIREBASE CONFIGURATION
+
+        // Firebase App, Auth, and Firestore instances
+        let app;
+        let auth;
+        let db;
+        let currentAuthUserId = null; // This is the UID from Firebase Auth (shared for the family)
+        let currentProfileId = null; // This is the ID of the selected in-app profile
+        let currentProfileName = null;
+        let isAuthReady = false; // Flag to indicate if auth state has been checked
+
+        // Constants for patriarch credentials
+        const PATRIARCH_EMAIL = "takwirira@proton.me";
+        const PATRIARCH_PASSWORD = "P-1.00.25";
+        const PATRIARCH_FAMILY_ID = "patriarch";
+
+        // Utility function to hash PINs (using Web Crypto API for security)
+        async function hashPIN(pin) {
+            const textEncoder = new TextEncoder();
+            const data = textEncoder.encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hexHash;
+        }
+
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            console.log("Initializing Firebase...");
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config is empty. Cannot initialize Firebase.");
+                // Display a persistent message if config is truly empty
+                document.getElementById('firebase-config-message').style.display = 'block';
+                return;
+            }
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                setupAuthListener();
+                // Ensure the initial login button is shown
+                initialContentWrapper.classList.remove('hidden'); // Ensure initial screen is visible
+                initialContentWrapper.style.display = 'block'; // Explicitly set display
+                document.getElementById('show-login-btn-initial').classList.remove('hidden');
+                console.log("Firebase initialized successfully with provided config.");
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showMessage("Failed to initialize Firebase. Please try again later.");
+            }
+        }
+
+        // Function to show custom message box
+        function showMessage(message) {
+            const messageBox = document.getElementById('general-message-box');
+            document.getElementById('general-message-text').textContent = message;
+            messageBox.style.display = 'flex';
+        }
+
+        // Function to close modals and optionally open a new one
+        function closeModal(modalId, openNextElementId = null) {
+            document.getElementById(modalId).style.display = 'none';
+            console.log(`closeModal: Hidden ${modalId}`);
+            if (openNextElementId) {
+                const nextElement = document.getElementById(openNextElementId);
+                if (nextElement) {
+                    nextElement.classList.remove('hidden');
+                    // Explicitly set display for content cards to ensure they are visible as blocks
+                    if (nextElement.classList.contains('content-card-style')) {
+                        nextElement.style.display = 'block';
+                        console.log(`closeModal: Displayed ${openNextElementId} as block.`);
+                    } else {
+                        // Modals are handled by their own display: flex
+                        nextElement.style.display = 'flex';
+                        console.log(`closeModal: Displayed ${openNextElementId} as flex.`);
+                    }
+                }
+            }
+        }
+
+        // UI Element References
+        const initialContentWrapper = document.getElementById('initial-content-wrapper');
+        const showLoginBtnInitial = document.getElementById('show-login-btn-initial');
+        const loginModal = document.getElementById('login-modal');
+        const loginSubmitBtn = document.getElementById('login-submit-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const mainDashboard = document.getElementById('main-dashboard');
+        const userDisplayId = document.getElementById('user-display-id'); // Now displays currentAuthUserId
+        const currentProfileNameDisplay = document.getElementById('current-profile-name-display');
+
+        // New Financial Input Fields
+        const inputIncomePastTwoWeeks = document.getElementById('input-income-past-two-weeks');
+        const inputCarInsurance = document.getElementById('input-car-insurance');
+        const inputGasMoney = document.getElementById('input-gas-money');
+        const inputCreditCardDebt = document.getElementById('input-credit-card-debt'); // Already exists
+        const oilChangeYesRadio = document.getElementById('oil-change-yes');
+        const oilChangeNoRadio = document.getElementById('oil-change-no');
+        const oilChangeInputContainer = document.getElementById('oil-change-input-container');
+        const inputOilChangeMoney = document.getElementById('input-oil-change-money');
+        const inputParking = document.getElementById('input-parking');
+        const inputCarWash = document.getElementById('input-car-wash');
+        const inputFunMoney = document.getElementById('input-fun-money');
+        const inputZimSupport = document.getElementById('input-zim-support');
+        const inputOffering = document.getElementById('input-offering');
+        const inputOtherCosts = document.getElementById('input-other-costs');
+
+        const saveFinancialDataBtn = document.getElementById('save-financial-data-btn');
+        const financialSaveMessage = document.getElementById('financial-save-message');
+
+        // New Financial Display Fields
+        const displayIncomePastTwoWeeks = document.getElementById('display-income-past-two-weeks');
+        const displayCarInsurance = document.getElementById('display-car-insurance');
+        const displayGasMoney = document.getElementById('display-gas-money');
+        const displayCreditCardDebt = document.getElementById('display-credit-card-debt');
+        const displayOilChangeMoney = document.getElementById('display-oil-change-money');
+        const displayParking = document.getElementById('display-parking');
+        const displayCarWash = document.getElementById('display-car-wash');
+        const displayFunMoney = document.getElementById('display-fun-money');
+        const displayZimSupport = document.getElementById('display-zim-support');
+        const displayOffering = document.getElementById('display-offering');
+        const displayOtherCosts = document.getElementById('display-other-costs');
+        const displayDisposableIncome = document.getElementById('display-disposable-income');
+
+        const displayLastUpdated = document.getElementById('display-last-updated');
+
+        const researchAllocationBtn = document.getElementById('research-allocation-btn');
+        const allocationResultDiv = document.getElementById('allocation-result');
+        const allocationText = document.getElementById('allocation-text');
+
+        const loginErrorMessage = document.getElementById('login-error-message');
+        const loginLoadingSpinner = document.getElementById('login-loading-spinner');
+        const researchLoadingSpinner = document.getElementById('research-loading-spinner');
+
+        // Profile Selection UI elements
+        const profileSelectionModal = document.getElementById('profile-selection-modal');
+        const profilesList = document.getElementById('profiles-list');
+        const noProfilesMessage = document.getElementById('no-profiles-message');
+        const createProfileBtn = document.getElementById('create-profile-btn');
+        const profileSelectionLoadingSpinner = document.getElementById('profile-selection-loading-spinner');
+        const switchProfileBtn = document.getElementById('switch-profile-btn');
+
+        // Create Profile UI elements
+        const createProfileModal = document.getElementById('create-profile-modal');
+        const newProfileNameInput = document.getElementById('new-profile-name');
+        const newProfilePinInput = document.getElementById('new-profile-pin');
+        const confirmNewProfilePinInput = document.getElementById('confirm-new-profile-pin');
+        const submitCreateProfileBtn = document.getElementById('submit-create-profile-btn');
+        const backToProfileSelectionBtn = document.getElementById('back-to-profile-selection-btn');
+        const createProfileErrorMessage = document.getElementById('create-profile-error-message');
+        const createProfileLoadingSpinner = document.getElementById('create-profile-loading-spinner');
+
+        // Enter PIN UI elements
+        const enterPinModal = document.getElementById('enter-pin-modal');
+        const pinProfileNameDisplay = document.getElementById('pin-profile-name');
+        const pinInput = document.getElementById('pin-input');
+        const submitPinBtn = document.getElementById('submit-pin-btn');
+        const backFromPinBtn = document.getElementById('back-from-pin-btn');
+        const pinErrorMessage = document.getElementById('pin-error-message');
+        const pinLoadingSpinner = document.getElementById('pin-loading-spinner');
+
+        let selectedProfileForPin = null; // To store the profile being accessed for PIN entry
+
+
+        // Event Listeners
+        showLoginBtnInitial.addEventListener('click', () => {
+            console.log("Initial Login button clicked. Showing login modal.");
+            initialContentWrapper.classList.add('hidden'); // Hide initial screen
+            loginModal.style.display = 'flex';
+            loginErrorMessage.classList.add('hidden'); // Clear previous errors
+        });
+
+        // New back button for login modal
+        const loginBackBtn = document.getElementById('login-back-btn');
+        loginBackBtn.addEventListener('click', () => {
+            console.log("Login modal 'Go Back' button clicked. Closing login modal.");
+            closeModal('login-modal', 'initial-content-wrapper'); // Close login modal, show initial wrapper
+        });
+
+        // Update close button for login modal to also go back
+        document.querySelector('#login-modal .close-button').onclick = () => {
+            console.log("Login modal close button clicked. Closing login modal.");
+            closeModal('login-modal', 'initial-content-wrapper');
+        };
+
+        // Event listener for Oil Change radio buttons
+        oilChangeYesRadio.addEventListener('change', () => {
+            if (oilChangeYesRadio.checked) {
+                oilChangeInputContainer.classList.remove('hidden');
+            }
+        });
+        oilChangeNoRadio.addEventListener('change', () => {
+            if (oilChangeNoRadio.checked) {
+                oilChangeInputContainer.classList.add('hidden');
+                inputOilChangeMoney.value = ''; // Clear value if not due
+            }
+        });
+
+
+        loginSubmitBtn.addEventListener('click', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        saveFinancialDataBtn.addEventListener('click', saveFinancialData);
+        researchAllocationBtn.addEventListener('click', researchAllocation);
+        createProfileBtn.addEventListener('click', () => {
+            closeModal('profile-selection-modal');
+            createProfileModal.style.display = 'flex';
+            createProfileErrorMessage.classList.add('hidden');
+            newProfileNameInput.value = '';
+            newProfilePinInput.value = '';
+            confirmNewProfilePinInput.value = '';
+        });
+        submitCreateProfileBtn.addEventListener('click', handleCreateProfile);
+        backToProfileSelectionBtn.addEventListener('click', () => {
+            closeModal('create-profile-modal', 'profile-selection-modal');
+            loadProfiles(); // Reload profiles when going back
+        });
+        submitPinBtn.addEventListener('click', handlePinEntry);
+        backFromPinBtn.addEventListener('click', () => {
+            closeModal('enter-pin-modal', 'profile-selection-modal');
+            pinInput.value = ''; // Clear PIN input
+        });
+        switchProfileBtn.addEventListener('click', () => {
+            mainDashboard.classList.add('hidden'); // Ensure dashboard is hidden before showing profile selection
+            profileSelectionModal.style.display = 'flex';
+            loadProfiles(); // Reload profiles when switching
+        });
+
+
+        // Firebase Authentication and Firestore Logic
+        async function setupAuthListener() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentAuthUserId = user.uid;
+                    console.log("Auth state changed: User is logged in with UID:", user.uid);
+
+                    // Attempt to sign in with custom token if available (for Canvas environment)
+                    if (typeof __initial_auth_token !== 'undefined' && !isAuthReady) {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                            console.log("Signed in with custom token.");
+                        } catch (error) {
+                            console.error("Error signing in with custom token:", error);
+                            // Fallback to anonymous if custom token fails or is not provided
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously due to custom token failure.");
+                        }
+                    } else if (!isAuthReady && !auth.currentUser) {
+                        // If no custom token and no current user, sign in anonymously
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+
+                    // After successful Firebase Auth login, show profile selection
+                    initialContentWrapper.classList.add('hidden'); // Hide initial screen
+                    loginModal.style.display = 'none'; // Hide login modal
+                    profileSelectionModal.style.display = 'flex'; // Show profile selection
+                    loadProfiles(); // Load profiles for this family account
+
+                } else {
+                    // User is signed out
+                    console.log("Auth state changed: User is logged out.");
+                    currentAuthUserId = null;
+                    currentProfileId = null;
+                    currentProfileName = null;
+                    initialContentWrapper.classList.remove('hidden'); // Show initial screen
+                    initialContentWrapper.style.display = 'block'; // Ensure it's block
+                    mainDashboard.classList.add('hidden'); // Hide dashboard
+                    profileSelectionModal.style.display = 'none'; // Hide profile selection
+                    document.getElementById('show-login-btn-initial').classList.remove('hidden'); // Ensure initial login button is visible
+                }
+                isAuthReady = true; // Auth state has been checked
+            });
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            loginErrorMessage.classList.add('hidden');
+            loginLoadingSpinner.style.display = 'block';
+            console.log("handleLogin: Attempting login for email:", email);
+
+            if (!email || !password) {
+                loginErrorMessage.textContent = "Please enter both family email and password.";
+                loginErrorMessage.classList.remove('hidden');
+                loginLoadingSpinner.style.display = 'none';
+                console.log("handleLogin: Missing email or password.");
+                return;
+            }
+
+            try {
+                // Attempt to sign in with provided credentials
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("handleLogin: signInWithEmailAndPassword successful.", userCredential.user.uid);
+                // The onAuthStateChanged listener will handle the UI update and profile loading
+                showMessage("Family login successful! Please select your profile.");
+            } catch (error) {
+                console.error("handleLogin: Error during login:", error);
+                let errorMessage = "Login failed. Please check your family credentials.";
+
+                // If the error is user-not-found AND it's the patriarch's credentials, attempt to create
+                if (error.code === 'auth/user-not-found' && email === PATRIARCH_EMAIL && password === PATRIARCH_PASSWORD) {
+                    try {
+                        console.log("handleLogin: Patriarch user not found, attempting to create...");
+                        const userCredential = await createUserWithEmailAndPassword(auth, PATRIARCH_EMAIL, PATRIARCH_PASSWORD);
+                        // Also create the Firestore user document immediately after creation
+                        await setDoc(doc(db, `artifacts/${appId}/public/data/users`, userCredential.user.uid), {
+                            uid: userCredential.user.uid,
+                            email: PATRIARCH_EMAIL,
+                            role: 'patriarch',
+                            patriarchFamilyId: PATRIARCH_FAMILY_ID,
+                            createdAt: new Date()
+                        });
+                        console.log("handleLogin: Patriarch user created and logged in successfully.");
+                        showMessage("Patriarch account created and logged in! Please create your first profile.");
+                        // The onAuthStateChanged listener will pick up this new login state and transition UI
+                    } catch (createError) {
+                        console.error("handleLogin: Error creating patriarch account:", createError);
+                        errorMessage = "Failed to create patriarch account. It might already exist or there's a Firebase configuration issue.";
+                        if (createError.code === 'auth/email-already-in-use') {
+                            errorMessage = "Patriarch account already exists. Please try logging in again.";
+                        } else if (createError.code === 'auth/weak-password') {
+                            errorMessage = "Patriarch password is too weak. (This should not happen with predefined password).";
+                        } else if (createError.code === 'auth/operation-not-allowed') {
+                            errorMessage = "Email/Password sign-up is not enabled in your Firebase project. Please enable it in Firebase Console > Authentication > Sign-in method.";
+                        }
+                    }
+                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    errorMessage = "Invalid family email or password.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "Invalid email format.";
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = "Email/Password sign-in is not enabled in your Firebase project. Please enable it in Firebase Console > Authentication > Sign-in method.";
+                }
+                loginErrorMessage.textContent = errorMessage;
+                loginErrorMessage.classList.remove('hidden');
+            } finally {
+                loginLoadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function handleLogout() {
+            console.log("handleLogout: Attempting logout.");
+            try {
+                await signOut(auth);
+                showMessage("Logged out successfully.");
+                console.log("handleLogout: signOut successful.");
+                // UI update handled by onAuthStateChanged listener
+            } catch (error) {
+                console.error("handleLogout: Error during logout:", error);
+                showMessage("Failed to log out. Please try again.");
+            }
+        }
+
+        // Profile Management Functions
+        async function loadProfiles() {
+            if (!currentAuthUserId) {
+                console.warn("loadProfiles: Cannot load profiles: No authenticated family user ID.");
+                profileSelectionLoadingSpinner.style.display = 'none';
+                return;
+            }
+
+            profileSelectionLoadingSpinner.style.display = 'block';
+            profilesList.innerHTML = ''; // Clear existing list
+            noProfilesMessage.classList.add('hidden'); // Hide "no profiles" message initially
+            console.log("loadProfiles: Loading profiles for ownerAuthUid:", currentAuthUserId);
+
+            try {
+                const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`), where("ownerAuthUid", "==", currentAuthUserId));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    noProfilesMessage.classList.remove('hidden');
+                    console.log("loadProfiles: No profiles found for this family account.");
+                } else {
+                    console.log("loadProfiles: Profiles found:", querySnapshot.docs.length);
+                    querySnapshot.forEach((doc) => {
+                        const profileData = doc.data();
+                        const profileCard = document.createElement('div');
+                        profileCard.className = 'profile-card';
+                        profileCard.dataset.profileId = doc.id;
+                        profileCard.dataset.profileName = profileData.name;
+                        profileCard.innerHTML = `
+                            <h3 class="text-xl font-semibold text-gray-800">${profileData.name}</h3>
+                            <p class="text-gray-600">${profileData.isPatriarchProfile ? 'Patriarch Profile' : 'Family Member'}</p>
+                        `;
+                        profileCard.addEventListener('click', () => {
+                            selectedProfileForPin = { id: doc.id, name: profileData.name, pinHash: profileData.pinHash };
+                            pinProfileNameDisplay.textContent = profileData.name;
+                            closeModal('profile-selection-modal');
+                            enterPinModal.style.display = 'flex';
+                            pinInput.value = ''; // Clear previous PIN
+                            pinErrorMessage.classList.add('hidden');
+                            console.log("loadProfiles: Profile selected:", profileData.name);
+                        });
+                        profilesList.appendChild(profileCard);
+                    });
+                }
+            } catch (error) {
+                console.error("loadProfiles: Error loading profiles:", error);
+                showMessage("Failed to load family profiles.");
+            } finally {
+                profileSelectionLoadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function handleCreateProfile() {
+            const profileName = newProfileNameInput.value.trim();
+            const pin = newProfilePinInput.value.trim();
+            const confirmPin = confirmNewProfilePinInput.value.trim();
+
+            createProfileErrorMessage.classList.add('hidden');
+            createProfileLoadingSpinner.style.display = 'block';
+            console.log("handleCreateProfile: Attempting to create profile:", profileName);
+
+            if (!profileName || !pin || !confirmPin) {
+                createProfileErrorMessage.textContent = "Please fill in all fields.";
+                createProfileErrorMessage.classList.remove('hidden');
+                createProfileLoadingSpinner.style.display = 'none';
+                console.log("handleCreateProfile: Missing profile name, PIN, or confirm PIN.");
+                return;
+            }
+            if (pin.length !== 4 || !/^\d+$/.test(pin)) {
+                createProfileErrorMessage.textContent = "PIN must be a 4-digit number.";
+                createProfileErrorMessage.classList.remove('hidden');
+                createProfileLoadingSpinner.style.display = 'none';
+                console.log("handleCreateProfile: Invalid PIN format.");
+                return;
+            }
+            if (pin !== confirmPin) {
+                createProfileErrorMessage.textContent = "PINs do not match.";
+                createProfileErrorMessage.classList.remove('hidden');
+                createProfileLoadingSpinner.style.display = 'none';
+                console.log("handleCreateProfile: PINs do not match.");
+                return;
+            }
+            if (!currentAuthUserId) {
+                createProfileErrorMessage.textContent = "Authentication error. Please re-login.";
+                createProfileErrorMessage.classList.remove('hidden');
+                createProfileLoadingSpinner.style.display = 'none';
+                console.log("handleCreateProfile: No current authenticated user ID.");
+                return;
+            }
+
+            try {
+                // Check if a profile with this name already exists for this family
+                const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`),
+                                where("ownerAuthUid", "==", currentAuthUserId),
+                                where("name", "==", profileName));
+                const existingProfiles = await getDocs(q);
+                if (!existingProfiles.empty) {
+                    createProfileErrorMessage.textContent = "A profile with this name already exists.";
+                    createProfileErrorMessage.classList.remove('hidden');
+                    createProfileLoadingSpinner.style.display = 'none';
+                    console.log("handleCreateProfile: Profile name already exists.");
+                    return;
+                }
+
+                const hashedPin = await hashPIN(pin);
+                const newProfileRef = doc(collection(db, `artifacts/${appId}/public/data/familyProfiles`)); // Firestore generates ID
+
+                await setDoc(newProfileRef, {
+                    name: profileName,
+                    pinHash: hashedPin,
+                    ownerAuthUid: currentAuthUserId, // Link to the single Firebase Auth user
+                    isPatriarchProfile: (profileName.toLowerCase() === 'patriarch'), // Mark patriarch profile
+                    createdAt: new Date(),
+                    // Initialize empty financial data for the new profile
+                    financialData: {
+                        incomePastTwoWeeks: 0,
+                        carInsurance: 0,
+                        gasMoney: 0,
+                        creditCardDebt: 0,
+                        oilChangeMoney: 0,
+                        parking: 0,
+                        carWash: 0,
+                        funMoney: 0,
+                        zimSupport: 0,
+                        offering: 0,
+                        otherCosts: 0,
+                        lastUpdated: null
+                    }
+                });
+
+                showMessage(`Profile "${profileName}" created successfully!`);
+                closeModal('create-profile-modal', 'profile-selection-modal');
+                loadProfiles(); // Reload profiles to show the new one
+                console.log("handleCreateProfile: Profile created successfully:", profileName);
+            } catch (error) {
+                console.error("handleCreateProfile: Error creating profile:", error);
+                createProfileErrorMessage.textContent = `Failed to create profile: ${error.message}`;
+                createProfileErrorMessage.classList.remove('hidden');
+            } finally {
+                createProfileLoadingSpinner.style.display = 'none';
+            }
+        }
+
+        async function handlePinEntry() {
+            const enteredPin = pinInput.value.trim();
+            pinErrorMessage.classList.add('hidden');
+            pinLoadingSpinner.style.display = 'block';
+            console.log("handlePinEntry: Attempting PIN entry for profile:", pinProfileNameDisplay.textContent);
+
+            if (!enteredPin || enteredPin.length !== 4 || !/^\d+$/.test(enteredPin)) {
+                pinErrorMessage.textContent = "Please enter a valid 4-digit PIN.";
+                pinErrorMessage.classList.remove('hidden');
+                pinLoadingSpinner.style.display = 'none';
+                console.log("handlePinEntry: Invalid PIN format.");
+                return;
+            }
+
+            if (!selectedProfileForPin) {
+                pinErrorMessage.textContent = "No profile selected.";
+                pinErrorMessage.classList.remove('hidden');
+                pinLoadingSpinner.style.display = 'none';
+                console.log("handlePinEntry: No profile selected for PIN entry.");
+                return;
+            }
+
+            try {
+                const hashedEnteredPin = await hashPIN(enteredPin);
+
+                if (hashedEnteredPin === selectedProfileForPin.pinHash) {
+                    currentProfileId = selectedProfileForPin.id;
+                    currentProfileName = selectedProfileForPin.name;
+                    showMessage(`Welcome, ${currentProfileName}!`);
+                    closeModal('enter-pin-modal');
+                    profileSelectionModal.style.display = 'none'; // Explicitly hide profile selection modal
+                    initialContentWrapper.classList.add('hidden'); // Ensure initial screen is hidden
+                    mainDashboard.classList.remove('hidden'); // Show dashboard
+                    mainDashboard.style.display = 'block'; // Explicitly ensure it's rendered as a block element
+
+                    userDisplayId.textContent = `Family ID: ${PATRIARCH_FAMILY_ID}`; // Display the fixed family ID
+                    currentProfileNameDisplay.textContent = currentProfileName; // Display the selected profile name
+                    setupFinancialDataListener(currentProfileId); // Start listening for this profile's financial data
+                    console.log("handlePinEntry: PIN entry successful. Dashboard loaded for profile:", currentProfileName);
+                } else {
+                    pinErrorMessage.textContent = "Incorrect PIN. Please try again.";
+                    pinErrorMessage.classList.remove('hidden');
+                    console.warn("handlePinEntry: Incorrect PIN entered.");
+                }
+            } catch (error) {
+                console.error("handlePinEntry: Error during PIN entry:", error);
+                pinErrorMessage.textContent = "An error occurred during PIN verification.";
+                pinErrorMessage.classList.remove('hidden');
+            } finally {
+                pinLoadingSpinner.style.display = 'none';
+            }
+        }
+
+
+        // Firestore Listeners and Operations for Dashboard (now per profile)
+        function setupFinancialDataListener(profileId) {
+            if (!profileId) {
+                console.warn("setupFinancialDataListener: No profile ID available for financial data listener.");
+                return;
+            }
+            console.log("setupFinancialDataListener: Setting up financial data listener for profile ID:", profileId);
+            // Financial data is now stored directly within the profile document
+            const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, profileId);
+
+            onSnapshot(profileDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const profileData = docSnap.data();
+                    const data = profileData.financialData || {}; // Get financialData sub-object
+                    console.log("setupFinancialDataListener: Financial data received:", data);
+
+                    displayIncomePastTwoWeeks.textContent = (data.incomePastTwoWeeks || 0).toFixed(2);
+                    displayCarInsurance.textContent = (data.carInsurance || 0).toFixed(2);
+                    displayGasMoney.textContent = (data.gasMoney || 0).toFixed(2);
+                    displayCreditCardDebt.textContent = (data.creditCardDebt || 0).toFixed(2);
+                    displayOilChangeMoney.textContent = (data.oilChangeMoney || 0).toFixed(2);
+                    displayParking.textContent = (data.parking || 0).toFixed(2);
+                    displayCarWash.textContent = (data.carWash || 0).toFixed(2);
+                    displayFunMoney.textContent = (data.funMoney || 0).toFixed(2);
+                    displayZimSupport.textContent = (data.zimSupport || 0).toFixed(2);
+                    displayOffering.textContent = (data.offering || 0).toFixed(2);
+                    displayOtherCosts.textContent = (data.otherCosts || 0).toFixed(2);
+
+                    // Calculate disposable income
+                    const totalIncome = (data.incomePastTwoWeeks || 0);
+                    const totalCosts = (data.carInsurance || 0) + (data.gasMoney || 0) +
+                                       (data.oilChangeMoney || 0) + (data.parking || 0) +
+                                       (data.carWash || 0) + (data.funMoney || 0) +
+                                       (data.zimSupport || 0) + (data.offering || 0) +
+                                       (data.otherCosts || 0);
+                    const disposableIncome = totalIncome - totalCosts;
+                    displayDisposableIncome.textContent = disposableIncome.toFixed(2);
+
+
+                    displayLastUpdated.textContent = data.lastUpdated ? new Date(data.lastUpdated.toDate()).toLocaleString() : 'N/A';
+
+                    // Populate input fields if they are empty or for initial load
+                    inputIncomePastTwoWeeks.value = data.incomePastTwoWeeks || '';
+                    inputCarInsurance.value = data.carInsurance || '';
+                    inputGasMoney.value = data.gasMoney || '';
+                    inputCreditCardDebt.value = data.creditCardDebt || '';
+                    inputOilChangeMoney.value = data.oilChangeMoney || '';
+                    oilChangeInputContainer.classList.toggle('hidden', (data.oilChangeMoney || 0) === 0);
+                    oilChangeYesRadio.checked = (data.oilChangeMoney || 0) > 0;
+                    oilChangeNoRadio.checked = (data.oilChangeMoney || 0) === 0;
+
+                    inputParking.value = data.parking || '';
+                    inputCarWash.value = data.carWash || '';
+                    inputFunMoney.value = data.funMoney || '';
+                    inputZimSupport.value = data.zimSupport || '';
+                    inputOffering.value = data.offering || '';
+                    inputOtherCosts.value = data.otherCosts || '';
+
+                } else {
+                    console.warn("setupFinancialDataListener: Financial data for this profile does not exist. Initializing with zeros.");
+                    // Initialize with zeros if document doesn't exist or financialData is missing
+                    displayIncomePastTwoWeeks.textContent = '0.00';
+                    displayCarInsurance.textContent = '0.00';
+                    displayGasMoney.textContent = '0.00';
+                    displayCreditCardDebt.textContent = '0.00';
+                    displayOilChangeMoney.textContent = '0.00';
+                    displayParking.textContent = '0.00';
+                    displayCarWash.textContent = '0.00';
+                    displayFunMoney.textContent = '0.00';
+                    displayZimSupport.textContent = '0.00';
+                    displayOffering.textContent = '0.00';
+                    displayOtherCosts.textContent = '0.00';
+                    displayDisposableIncome.textContent = '0.00'; // Also initialize disposable income
+                    displayLastUpdated.textContent = 'N/A';
+
+                    inputIncomePastTwoWeeks.value = '';
+                    inputCarInsurance.value = '';
+                    inputGasMoney.value = '';
+                    inputCreditCardDebt.value = '';
+                    inputOilChangeMoney.value = '';
+                    oilChangeInputContainer.classList.add('hidden'); // Hide by default
+                    oilChangeNoRadio.checked = true; // Set 'No' as default
+                    oilChangeYesRadio.checked = false;
+
+                    inputParking.value = '';
+                    inputCarWash.value = '';
+                    inputFunMoney.value = '';
+                    inputZimSupport.value = '';
+                    inputOffering.value = '';
+                    inputOtherCosts.value = '';
+                }
+            }, (error) => {
+                console.error("setupFinancialDataListener: Error listening to financial data:", error);
+                showMessage("Error loading financial data for profile.");
+            });
+        }
+
+        async function saveFinancialData() {
+            if (!currentProfileId) {
+                showMessage("Please select a profile to save data.");
+                return;
+            }
+            console.log("saveFinancialData: Attempting to save financial data for profile ID:", currentProfileId);
+
+            const dataToSave = {
+                incomePastTwoWeeks: parseFloat(inputIncomePastTwoWeeks.value) || 0,
+                carInsurance: parseFloat(inputCarInsurance.value) || 0,
+                gasMoney: parseFloat(inputGasMoney.value) || 0,
+                creditCardDebt: parseFloat(inputCreditCardDebt.value) || 0,
+                oilChangeMoney: oilChangeYesRadio.checked ? (parseFloat(inputOilChangeMoney.value) || 0) : 0,
+                parking: parseFloat(inputParking.value) || 0,
+                carWash: parseFloat(inputCarWash.value) || 0,
+                funMoney: parseFloat(inputFunMoney.value) || 0,
+                zimSupport: parseFloat(inputZimSupport.value) || 0,
+                offering: parseFloat(inputOffering.value) || 0,
+                otherCosts: parseFloat(inputOtherCosts.value) || 0,
+                lastUpdated: new Date()
+            };
+
+            try {
+                // Update the financialData field within the specific profile document
+                const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, currentProfileId);
+                await updateDoc(profileDocRef, { financialData: dataToSave });
+                financialSaveMessage.textContent = "Financial data saved successfully!";
+                financialSaveMessage.classList.remove('hidden');
+                setTimeout(() => financialSaveMessage.classList.add('hidden'), 3000);
+                console.log("saveFinancialData: Financial data saved successfully.");
+            } catch (error) {
+                console.error("saveFinancialData: Error saving financial data:", error);
+                financialSaveMessage.textContent = "Failed to save financial data.";
+                financialSaveMessage.classList.remove('hidden');
+                financialSaveMessage.classList.remove('text-green-600');
+                financialSaveMessage.classList.add('text-red-500');
+            }
+        }
+
+        // LLM Integration for Allocation Research
+        async function researchAllocation() {
+            const incomePastTwoWeeks = parseFloat(displayIncomePastTwoWeeks.textContent);
+            const carInsurance = parseFloat(displayCarInsurance.textContent);
+            const gasMoney = parseFloat(displayGasMoney.textContent);
+            const creditCardDebt = parseFloat(displayCreditCardDebt.textContent);
+            const oilChangeMoney = parseFloat(displayOilChangeMoney.textContent);
+            const parking = parseFloat(displayParking.textContent);
+            const carWash = parseFloat(displayCarWash.textContent);
+            const funMoney = parseFloat(displayFunMoney.textContent);
+            const zimSupport = parseFloat(displayZimSupport.textContent);
+            const offering = parseFloat(displayOffering.textContent);
+            const otherCosts = parseFloat(displayOtherCosts.textContent);
+            const disposableIncome = parseFloat(displayDisposableIncome.textContent);
+
+            if (isNaN(disposableIncome)) {
+                showMessage("Please ensure you have entered and saved your financial data first.");
+                return;
+            }
+
+            researchLoadingSpinner.style.display = 'block';
+            allocationResultDiv.classList.add('hidden');
+            allocationText.textContent = ''; // Clear previous result
+            console.log("researchAllocation: Initiating allocation research for profile:", currentProfileName);
+
+            const prompt = `
+                I am managing my family's finances for the profile "${currentProfileName}". Here are the current financial details:
+                - Income (Past 2 Weeks): $${incomePastTwoWeeks.toFixed(2)}
+                - Car Insurance: $${carInsurance.toFixed(2)}
+                - Gas Money: $${gasMoney.toFixed(2)}
+                - Current Credit Card Debt: $${creditCardDebt.toFixed(2)}
+                - Oil Change Money (if due): $${oilChangeMoney.toFixed(2)}
+                - Parking Costs: $${parking.toFixed(2)}
+                - Car Wash Money: $${carWash.toFixed(2)}
+                - Fun Money: $${funMoney.toFixed(2)}
+                - Zim Support: $${zimSupport.toFixed(2)}
+                - Offering: $${offering.toFixed(2)}
+                - Other Costs (e.g., Self Care): $${otherCosts.toFixed(2)}
+                - Calculated Disposable Income: $${disposableIncome.toFixed(2)}
+
+                Considering these figures, please provide a detailed financial allocation plan for the disposable income.
+                Suggest specific percentages or amounts for:
+                1. Debt repayment (prioritize credit card debt)
+                2. Savings (emergency fund, long-term goals)
+                3. Investments (diversification, growth)
+                4. Discretionary spending
+
+                For investments, specifically break down the allocation into:
+                - Cash
+                - Mutual Funds
+                - Crypto
+                - Stocks
+
+                Provide actionable advice and explain the reasoning behind your recommendations.
+                Present the allocation plan in a clear, well-structured, and nicely formatted way, perhaps using bullet points or a table for the breakdown.
+                Focus on security and long-term financial health for a nuclear family.
+            `;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Canvas will provide this automatically
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    allocationText.textContent = text;
+                    allocationResultDiv.classList.remove('hidden');
+                    console.log("researchAllocation: Allocation advice received successfully.");
+                } else {
+                    showMessage("Failed to get allocation advice. No response from AI.");
+                    console.error("researchAllocation: LLM response structure unexpected:", result);
+                }
+            } catch (error) {
+                console.error("researchAllocation: Error calling LLM API:", error);
+                showMessage("Failed to get allocation advice. Network error or API issue.");
+            } finally {
+                researchLoadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Initialize Firebase when the window loads
+        window.onload = initializeFirebase;
+
+    </script>
+</body>
+</html>
