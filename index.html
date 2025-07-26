@@ -11,8 +11,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8; /* Light blue-gray background */
-            /* Removed display: flex; justify-content: center; align-items: center; */
-            /* Instead, center the content-card-style elements using margin: auto */
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -25,13 +23,14 @@
             border-radius: 1rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 90%;
-            width: 500px;
+            max-width: 960px; /* Increased max-width for wider layout */
+            width: 90%; /* Responsive width */
             position: relative;
-            min-height: 300px; /* Added for visibility */
+            min-height: 500px; /* Increased min-height for better visibility */
             box-sizing: border-box;
             margin-left: auto; /* Center horizontally */
             margin-right: auto; /* Center horizontally */
+            display: none; /* Hidden by default, controlled by JS */
         }
         .modal {
             display: none; /* Hidden by default */
@@ -43,6 +42,7 @@
             height: 100%;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            display: flex; /* Use flex to center modal content */
             justify-content: center;
             align-items: center;
         }
@@ -52,9 +52,11 @@
             padding: 2.5rem;
             border-radius: 1rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            max-width: 90%;
-            width: 450px;
+            max-width: 800px; /* Increased max-width for wider modal */
+            width: 90%; /* Responsive width */
             position: relative;
+            max-height: 90vh; /* Limit height and allow scrolling */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
         }
         .close-button {
             color: #aaa;
@@ -80,7 +82,7 @@
             margin-bottom: 1rem;
             border: 1px solid #cbd5e0; /* Light gray border */
             border-radius: 0.5rem;
-            box-sizing: border-box; /* Changed from border to border-box for consistent sizing */
+            box-sizing: border-box;
             font-size: 1rem;
         }
         button {
@@ -227,7 +229,7 @@
 
 
     <!-- Main Dashboard (hidden by default) -->
-    <div id="main-dashboard" class="content-card-style hidden">
+    <div id="main-dashboard" class="content-card-style">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">MyPatriarch Dashboard (<span id="current-profile-name-display"></span>)</h1>
             <div class="flex items-center">
@@ -393,10 +395,9 @@
 
         // Initialize Firebase
         function initializeFirebase() {
-            console.log("Initializing Firebase...");
+            console.log("App Init: Initializing Firebase...");
             if (Object.keys(firebaseConfig).length === 0) {
-                console.error("Firebase config is empty. Cannot initialize Firebase.");
-                // Display a persistent message if config is truly empty
+                console.error("App Init: Firebase config is empty. Cannot initialize Firebase.");
                 document.getElementById('firebase-config-message').style.display = 'block';
                 return;
             }
@@ -405,13 +406,12 @@
                 auth = getAuth(app);
                 db = getFirestore(app);
                 setupAuthListener();
-                // Ensure the initial login button is shown
-                initialContentWrapper.classList.remove('hidden'); // Ensure initial screen is visible
-                initialContentWrapper.style.display = 'block'; // Explicitly set display
-                document.getElementById('show-login-btn-initial').classList.remove('hidden');
-                console.log("Firebase initialized successfully with provided config.");
+                // Ensure the initial login screen is visible at start
+                initialContentWrapper.classList.remove('hidden');
+                initialContentWrapper.style.display = 'block';
+                console.log("App Init: Firebase initialized successfully with provided config.");
             } catch (error) {
-                console.error("Error initializing Firebase:", error);
+                console.error("App Init: Error initializing Firebase:", error);
                 showMessage("Failed to initialize Firebase. Please try again later.");
             }
         }
@@ -529,7 +529,7 @@
 
         // Event Listeners
         showLoginBtnInitial.addEventListener('click', () => {
-            console.log("Initial Login button clicked. Showing login modal.");
+            console.log("Event: Initial Login button clicked. Hiding initial content, showing login modal.");
             initialContentWrapper.classList.add('hidden'); // Hide initial screen
             loginModal.style.display = 'flex';
             loginErrorMessage.classList.add('hidden'); // Clear previous errors
@@ -538,13 +538,13 @@
         // New back button for login modal
         const loginBackBtn = document.getElementById('login-back-btn');
         loginBackBtn.addEventListener('click', () => {
-            console.log("Login modal 'Go Back' button clicked. Closing login modal.");
+            console.log("Event: Login modal 'Go Back' button clicked. Closing login modal, showing initial content.");
             closeModal('login-modal', 'initial-content-wrapper'); // Close login modal, show initial wrapper
         });
 
         // Update close button for login modal to also go back
         document.querySelector('#login-modal .close-button').onclick = () => {
-            console.log("Login modal close button clicked. Closing login modal.");
+            console.log("Event: Login modal close button clicked. Closing login modal, showing initial content.");
             closeModal('login-modal', 'initial-content-wrapper');
         };
 
@@ -552,12 +552,14 @@
         oilChangeYesRadio.addEventListener('change', () => {
             if (oilChangeYesRadio.checked) {
                 oilChangeInputContainer.classList.remove('hidden');
+                console.log("UI: Oil change input container shown.");
             }
         });
         oilChangeNoRadio.addEventListener('change', () => {
             if (oilChangeNoRadio.checked) {
                 oilChangeInputContainer.classList.add('hidden');
                 inputOilChangeMoney.value = ''; // Clear value if not due
+                console.log("UI: Oil change input container hidden.");
             }
         });
 
@@ -567,6 +569,7 @@
         saveFinancialDataBtn.addEventListener('click', saveFinancialData);
         researchAllocationBtn.addEventListener('click', researchAllocation);
         createProfileBtn.addEventListener('click', () => {
+            console.log("Event: 'Create New Profile' button clicked. Hiding profile selection, showing create profile modal.");
             closeModal('profile-selection-modal');
             createProfileModal.style.display = 'flex';
             createProfileErrorMessage.classList.add('hidden');
@@ -576,16 +579,20 @@
         });
         submitCreateProfileBtn.addEventListener('click', handleCreateProfile);
         backToProfileSelectionBtn.addEventListener('click', () => {
+            console.log("Event: 'Back to Profile Selection' button clicked. Closing create profile, showing profile selection.");
             closeModal('create-profile-modal', 'profile-selection-modal');
             loadProfiles(); // Reload profiles when going back
         });
         submitPinBtn.addEventListener('click', handlePinEntry);
         backFromPinBtn.addEventListener('click', () => {
+            console.log("Event: 'Back from PIN' button clicked. Closing PIN entry, showing profile selection.");
             closeModal('enter-pin-modal', 'profile-selection-modal');
             pinInput.value = ''; // Clear PIN input
         });
         switchProfileBtn.addEventListener('click', () => {
+            console.log("Event: 'Switch Profile' button clicked. Hiding dashboard, showing profile selection.");
             mainDashboard.classList.add('hidden'); // Ensure dashboard is hidden before showing profile selection
+            mainDashboard.style.display = 'none'; // Explicitly hide
             profileSelectionModal.style.display = 'flex';
             loadProfiles(); // Reload profiles when switching
         });
@@ -596,40 +603,43 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentAuthUserId = user.uid;
-                    console.log("Auth state changed: User is logged in with UID:", user.uid);
+                    console.log("Auth State: User is logged in with UID:", user.uid);
 
                     // Attempt to sign in with custom token if available (for Canvas environment)
                     if (typeof __initial_auth_token !== 'undefined' && !isAuthReady) {
                         try {
                             await signInWithCustomToken(auth, __initial_auth_token);
-                            console.log("Signed in with custom token.");
+                            console.log("Auth State: Signed in with custom token.");
                         } catch (error) {
-                            console.error("Error signing in with custom token:", error);
+                            console.error("Auth State: Error signing in with custom token:", error);
                             // Fallback to anonymous if custom token fails or is not provided
                             await signInAnonymously(auth);
-                            console.log("Signed in anonymously due to custom token failure.");
+                            console.log("Auth State: Signed in anonymously due to custom token failure.");
                         }
                     } else if (!isAuthReady && !auth.currentUser) {
                         // If no custom token and no current user, sign in anonymously
                         await signInAnonymously(auth);
-                        console.log("Signed in anonymously.");
+                        console.log("Auth State: Signed in anonymously.");
                     }
 
                     // After successful Firebase Auth login, show profile selection
+                    console.log("Auth State: Authenticated. Hiding initial/login, showing profile selection modal.");
                     initialContentWrapper.classList.add('hidden'); // Hide initial screen
+                    initialContentWrapper.style.display = 'none';
                     loginModal.style.display = 'none'; // Hide login modal
                     profileSelectionModal.style.display = 'flex'; // Show profile selection
                     loadProfiles(); // Load profiles for this family account
 
                 } else {
                     // User is signed out
-                    console.log("Auth state changed: User is logged out.");
+                    console.log("Auth State: User is logged out. Showing initial content, hiding others.");
                     currentAuthUserId = null;
                     currentProfileId = null;
                     currentProfileName = null;
                     initialContentWrapper.classList.remove('hidden'); // Show initial screen
                     initialContentWrapper.style.display = 'block'; // Ensure it's block
                     mainDashboard.classList.add('hidden'); // Hide dashboard
+                    mainDashboard.style.display = 'none';
                     profileSelectionModal.style.display = 'none'; // Hide profile selection
                     document.getElementById('show-login-btn-initial').classList.remove('hidden'); // Ensure initial login button is visible
                 }
@@ -643,30 +653,30 @@
 
             loginErrorMessage.classList.add('hidden');
             loginLoadingSpinner.style.display = 'block';
-            console.log("handleLogin: Attempting login for email:", email);
+            console.log("Login Handler: Attempting login for email:", email);
 
             if (!email || !password) {
                 loginErrorMessage.textContent = "Please enter both family email and password.";
                 loginErrorMessage.classList.remove('hidden');
                 loginLoadingSpinner.style.display = 'none';
-                console.log("handleLogin: Missing email or password.");
+                console.log("Login Handler: Missing email or password.");
                 return;
             }
 
             try {
                 // Attempt to sign in with provided credentials
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log("handleLogin: signInWithEmailAndPassword successful.", userCredential.user.uid);
-                // The onAuthStateChanged listener will handle the UI update and profile loading
+                console.log("Login Handler: signInWithEmailAndPassword successful. UID:", userCredential.user.uid);
                 showMessage("Family login successful! Please select your profile.");
+                // onAuthStateChanged listener will handle the UI transition
             } catch (error) {
-                console.error("handleLogin: Error during login:", error);
+                console.error("Login Handler: Error during login:", error);
                 let errorMessage = "Login failed. Please check your family credentials.";
 
                 // If the error is user-not-found AND it's the patriarch's credentials, attempt to create
                 if (error.code === 'auth/user-not-found' && email === PATRIARCH_EMAIL && password === PATRIARCH_PASSWORD) {
                     try {
-                        console.log("handleLogin: Patriarch user not found, attempting to create...");
+                        console.log("Login Handler: Patriarch user not found, attempting to create...");
                         const userCredential = await createUserWithEmailAndPassword(auth, PATRIARCH_EMAIL, PATRIARCH_PASSWORD);
                         // Also create the Firestore user document immediately after creation
                         await setDoc(doc(db, `artifacts/${appId}/public/data/users`, userCredential.user.uid), {
@@ -676,11 +686,11 @@
                             patriarchFamilyId: PATRIARCH_FAMILY_ID,
                             createdAt: new Date()
                         });
-                        console.log("handleLogin: Patriarch user created and logged in successfully.");
+                        console.log("Login Handler: Patriarch user created and logged in successfully.");
                         showMessage("Patriarch account created and logged in! Please create your first profile.");
-                        // The onAuthStateChanged listener will pick up this new login state and transition UI
+                        // onAuthStateChanged listener will pick up this new login state and transition UI
                     } catch (createError) {
-                        console.error("handleLogin: Error creating patriarch account:", createError);
+                        console.error("Login Handler: Error creating patriarch account:", createError);
                         errorMessage = "Failed to create patriarch account. It might already exist or there's a Firebase configuration issue.";
                         if (createError.code === 'auth/email-already-in-use') {
                             errorMessage = "Patriarch account already exists. Please try logging in again.";
@@ -705,14 +715,14 @@
         }
 
         async function handleLogout() {
-            console.log("handleLogout: Attempting logout.");
+            console.log("Logout Handler: Attempting logout.");
             try {
                 await signOut(auth);
                 showMessage("Logged out successfully.");
-                console.log("handleLogout: signOut successful.");
+                console.log("Logout Handler: signOut successful.");
                 // UI update handled by onAuthStateChanged listener
             } catch (error) {
-                console.error("handleLogout: Error during logout:", error);
+                console.error("Logout Handler: Error during logout:", error);
                 showMessage("Failed to log out. Please try again.");
             }
         }
@@ -720,7 +730,7 @@
         // Profile Management Functions
         async function loadProfiles() {
             if (!currentAuthUserId) {
-                console.warn("loadProfiles: Cannot load profiles: No authenticated family user ID.");
+                console.warn("Load Profiles: Cannot load profiles: No authenticated family user ID.");
                 profileSelectionLoadingSpinner.style.display = 'none';
                 return;
             }
@@ -728,7 +738,7 @@
             profileSelectionLoadingSpinner.style.display = 'block';
             profilesList.innerHTML = ''; // Clear existing list
             noProfilesMessage.classList.add('hidden'); // Hide "no profiles" message initially
-            console.log("loadProfiles: Loading profiles for ownerAuthUid:", currentAuthUserId);
+            console.log("Load Profiles: Loading profiles for ownerAuthUid:", currentAuthUserId);
 
             try {
                 const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`), where("ownerAuthUid", "==", currentAuthUserId));
@@ -736,9 +746,9 @@
 
                 if (querySnapshot.empty) {
                     noProfilesMessage.classList.remove('hidden');
-                    console.log("loadProfiles: No profiles found for this family account.");
+                    console.log("Load Profiles: No profiles found for this family account.");
                 } else {
-                    console.log("loadProfiles: Profiles found:", querySnapshot.docs.length);
+                    console.log("Load Profiles: Profiles found:", querySnapshot.docs.length);
                     querySnapshot.forEach((doc) => {
                         const profileData = doc.data();
                         const profileCard = document.createElement('div');
@@ -752,20 +762,22 @@
                         profileCard.addEventListener('click', () => {
                             selectedProfileForPin = { id: doc.id, name: profileData.name, pinHash: profileData.pinHash };
                             pinProfileNameDisplay.textContent = profileData.name;
+                            console.log("Load Profiles: Profile selected for PIN entry:", profileData.name);
                             closeModal('profile-selection-modal');
                             enterPinModal.style.display = 'flex';
                             pinInput.value = ''; // Clear previous PIN
                             pinErrorMessage.classList.add('hidden');
-                            console.log("loadProfiles: Profile selected:", profileData.name);
                         });
                         profilesList.appendChild(profileCard);
+                        console.log(`Load Profiles: Appended profile card for: ${profileData.name}`);
                     });
                 }
             } catch (error) {
-                console.error("loadProfiles: Error loading profiles:", error);
+                console.error("Load Profiles: Error loading profiles:", error);
                 showMessage("Failed to load family profiles.");
             } finally {
                 profileSelectionLoadingSpinner.style.display = 'none';
+                console.log("Load Profiles: Profile loading complete.");
             }
         }
 
@@ -776,34 +788,34 @@
 
             createProfileErrorMessage.classList.add('hidden');
             createProfileLoadingSpinner.style.display = 'block';
-            console.log("handleCreateProfile: Attempting to create profile:", profileName);
+            console.log("Create Profile Handler: Attempting to create profile:", profileName);
 
             if (!profileName || !pin || !confirmPin) {
                 createProfileErrorMessage.textContent = "Please fill in all fields.";
                 createProfileErrorMessage.classList.remove('hidden');
                 createProfileLoadingSpinner.style.display = 'none';
-                console.log("handleCreateProfile: Missing profile name, PIN, or confirm PIN.");
+                console.log("Create Profile Handler: Missing profile name, PIN, or confirm PIN.");
                 return;
             }
             if (pin.length !== 4 || !/^\d+$/.test(pin)) {
                 createProfileErrorMessage.textContent = "PIN must be a 4-digit number.";
                 createProfileErrorMessage.classList.remove('hidden');
                 createProfileLoadingSpinner.style.display = 'none';
-                console.log("handleCreateProfile: Invalid PIN format.");
+                console.log("Create Profile Handler: Invalid PIN format.");
                 return;
             }
             if (pin !== confirmPin) {
                 createProfileErrorMessage.textContent = "PINs do not match.";
                 createProfileErrorMessage.classList.remove('hidden');
                 createProfileLoadingSpinner.style.display = 'none';
-                console.log("handleCreateProfile: PINs do not match.");
+                console.log("Create Profile Handler: PINs do not match.");
                 return;
             }
             if (!currentAuthUserId) {
                 createProfileErrorMessage.textContent = "Authentication error. Please re-login.";
                 createProfileErrorMessage.classList.remove('hidden');
                 createProfileLoadingSpinner.style.display = 'none';
-                console.log("handleCreateProfile: No current authenticated user ID.");
+                console.log("Create Profile Handler: No current authenticated user ID.");
                 return;
             }
 
@@ -817,7 +829,7 @@
                     createProfileErrorMessage.textContent = "A profile with this name already exists.";
                     createProfileErrorMessage.classList.remove('hidden');
                     createProfileLoadingSpinner.style.display = 'none';
-                    console.log("handleCreateProfile: Profile name already exists.");
+                    console.log("Create Profile Handler: Profile name already exists.");
                     return;
                 }
 
@@ -850,9 +862,9 @@
                 showMessage(`Profile "${profileName}" created successfully!`);
                 closeModal('create-profile-modal', 'profile-selection-modal');
                 loadProfiles(); // Reload profiles to show the new one
-                console.log("handleCreateProfile: Profile created successfully:", profileName);
+                console.log("Create Profile Handler: Profile created successfully:", profileName);
             } catch (error) {
-                console.error("handleCreateProfile: Error creating profile:", error);
+                console.error("Create Profile Handler: Error creating profile:", error);
                 createProfileErrorMessage.textContent = `Failed to create profile: ${error.message}`;
                 createProfileErrorMessage.classList.remove('hidden');
             } finally {
@@ -864,13 +876,13 @@
             const enteredPin = pinInput.value.trim();
             pinErrorMessage.classList.add('hidden');
             pinLoadingSpinner.style.display = 'block';
-            console.log("handlePinEntry: Attempting PIN entry for profile:", pinProfileNameDisplay.textContent);
+            console.log("PIN Entry Handler: Attempting PIN entry for profile:", pinProfileNameDisplay.textContent);
 
             if (!enteredPin || enteredPin.length !== 4 || !/^\d+$/.test(enteredPin)) {
                 pinErrorMessage.textContent = "Please enter a valid 4-digit PIN.";
                 pinErrorMessage.classList.remove('hidden');
                 pinLoadingSpinner.style.display = 'none';
-                console.log("handlePinEntry: Invalid PIN format.");
+                console.log("PIN Entry Handler: Invalid PIN format.");
                 return;
             }
 
@@ -878,7 +890,7 @@
                 pinErrorMessage.textContent = "No profile selected.";
                 pinErrorMessage.classList.remove('hidden');
                 pinLoadingSpinner.style.display = 'none';
-                console.log("handlePinEntry: No profile selected for PIN entry.");
+                console.log("PIN Entry Handler: No profile selected for PIN entry.");
                 return;
             }
 
@@ -892,20 +904,21 @@
                     closeModal('enter-pin-modal');
                     profileSelectionModal.style.display = 'none'; // Explicitly hide profile selection modal
                     initialContentWrapper.classList.add('hidden'); // Ensure initial screen is hidden
+                    initialContentWrapper.style.display = 'none'; // Explicitly hide
                     mainDashboard.classList.remove('hidden'); // Show dashboard
                     mainDashboard.style.display = 'block'; // Explicitly ensure it's rendered as a block element
 
                     userDisplayId.textContent = `Family ID: ${PATRIARCH_FAMILY_ID}`; // Display the fixed family ID
                     currentProfileNameDisplay.textContent = currentProfileName; // Display the selected profile name
                     setupFinancialDataListener(currentProfileId); // Start listening for this profile's financial data
-                    console.log("handlePinEntry: PIN entry successful. Dashboard loaded for profile:", currentProfileName);
+                    console.log("PIN Entry Handler: PIN entry successful. Dashboard loaded for profile:", currentProfileName);
                 } else {
                     pinErrorMessage.textContent = "Incorrect PIN. Please try again.";
                     pinErrorMessage.classList.remove('hidden');
-                    console.warn("handlePinEntry: Incorrect PIN entered.");
+                    console.warn("PIN Entry Handler: Incorrect PIN entered.");
                 }
             } catch (error) {
-                console.error("handlePinEntry: Error during PIN entry:", error);
+                console.error("PIN Entry Handler: Error during PIN entry:", error);
                 pinErrorMessage.textContent = "An error occurred during PIN verification.";
                 pinErrorMessage.classList.remove('hidden');
             } finally {
@@ -917,10 +930,10 @@
         // Firestore Listeners and Operations for Dashboard (now per profile)
         function setupFinancialDataListener(profileId) {
             if (!profileId) {
-                console.warn("setupFinancialDataListener: No profile ID available for financial data listener.");
+                console.warn("Financial Data Listener: No profile ID available for financial data listener.");
                 return;
             }
-            console.log("setupFinancialDataListener: Setting up financial data listener for profile ID:", profileId);
+            console.log("Financial Data Listener: Setting up financial data listener for profile ID:", profileId);
             // Financial data is now stored directly within the profile document
             const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, profileId);
 
@@ -928,7 +941,7 @@
                 if (docSnap.exists()) {
                     const profileData = docSnap.data();
                     const data = profileData.financialData || {}; // Get financialData sub-object
-                    console.log("setupFinancialDataListener: Financial data received:", data);
+                    console.log("Financial Data Listener: Financial data received:", data);
 
                     displayIncomePastTwoWeeks.textContent = (data.incomePastTwoWeeks || 0).toFixed(2);
                     displayCarInsurance.textContent = (data.carInsurance || 0).toFixed(2);
@@ -973,7 +986,7 @@
                     inputOtherCosts.value = data.otherCosts || '';
 
                 } else {
-                    console.warn("setupFinancialDataListener: Financial data for this profile does not exist. Initializing with zeros.");
+                    console.warn("Financial Data Listener: Financial data for this profile does not exist. Initializing with zeros.");
                     // Initialize with zeros if document doesn't exist or financialData is missing
                     displayIncomePastTwoWeeks.textContent = '0.00';
                     displayCarInsurance.textContent = '0.00';
@@ -1006,7 +1019,7 @@
                     inputOtherCosts.value = '';
                 }
             }, (error) => {
-                console.error("setupFinancialDataListener: Error listening to financial data:", error);
+                console.error("Financial Data Listener: Error listening to financial data:", error);
                 showMessage("Error loading financial data for profile.");
             });
         }
@@ -1016,7 +1029,7 @@
                 showMessage("Please select a profile to save data.");
                 return;
             }
-            console.log("saveFinancialData: Attempting to save financial data for profile ID:", currentProfileId);
+            console.log("Save Financial Data: Attempting to save financial data for profile ID:", currentProfileId);
 
             const dataToSave = {
                 incomePastTwoWeeks: parseFloat(inputIncomePastTwoWeeks.value) || 0,
@@ -1040,9 +1053,9 @@
                 financialSaveMessage.textContent = "Financial data saved successfully!";
                 financialSaveMessage.classList.remove('hidden');
                 setTimeout(() => financialSaveMessage.classList.add('hidden'), 3000);
-                console.log("saveFinancialData: Financial data saved successfully.");
+                console.log("Save Financial Data: Financial data saved successfully.");
             } catch (error) {
-                console.error("saveFinancialData: Error saving financial data:", error);
+                console.error("Save Financial Data: Error saving financial data:", error);
                 financialSaveMessage.textContent = "Failed to save financial data.";
                 financialSaveMessage.classList.remove('hidden');
                 financialSaveMessage.classList.remove('text-green-600');
@@ -1073,7 +1086,7 @@
             researchLoadingSpinner.style.display = 'block';
             allocationResultDiv.classList.add('hidden');
             allocationText.textContent = ''; // Clear previous result
-            console.log("researchAllocation: Initiating allocation research for profile:", currentProfileName);
+            console.log("Research Allocation: Initiating allocation research for profile:", currentProfileName);
 
             const prompt = `
                 I am managing my family's finances for the profile "${currentProfileName}". Here are the current financial details:
@@ -1128,13 +1141,13 @@
                     const text = result.candidates[0].content.parts[0].text;
                     allocationText.textContent = text;
                     allocationResultDiv.classList.remove('hidden');
-                    console.log("researchAllocation: Allocation advice received successfully.");
+                    console.log("Research Allocation: Allocation advice received successfully.");
                 } else {
                     showMessage("Failed to get allocation advice. No response from AI.");
-                    console.error("researchAllocation: LLM response structure unexpected:", result);
+                    console.error("Research Allocation: LLM response structure unexpected:", result);
                 }
             } catch (error) {
-                console.error("researchAllocation: Error calling LLM API:", error);
+                console.error("Research Allocation: Error calling LLM API:", error);
                 showMessage("Failed to get allocation advice. Network error or API issue.");
             } finally {
                 researchLoadingSpinner.style.display = 'none';
