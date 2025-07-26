@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyPatriarch</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -14,22 +13,25 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            text-align: center; /* To center block elements */
             min-height: 100vh; /* Ensure body takes full height */
+            display: flex; /* Use flexbox for body to center its content */
+            justify-content: center;
+            align-items: flex-start; /* Align at the top, allowing content to flow down */
+            padding-top: 50px; /* Add some padding from the top */
         }
-        .content-card-style { /* New class for common card styling */
+        .content-card-style {
             background-color: #ffffff;
             padding: 3rem;
             border-radius: 1rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 960px; /* Increased max-width for wider layout */
-            width: 90%; /* Responsive width */
+            max-width: 960px;
+            width: 90%;
             position: relative;
-            min-height: 500px; /* Increased min-height for better visibility */
+            min-height: 500px;
             box-sizing: border-box;
-            margin-left: auto; /* Center horizontally */
-            margin-right: auto; /* Center horizontally */
+            /* margin-left: auto; */ /* Removed as body flex handles centering */
+            /* margin-right: auto; */ /* Removed as body flex handles centering */
             display: none; /* Hidden by default, controlled by JS */
         }
         .modal {
@@ -48,19 +50,19 @@
         }
         .modal-content {
             background-color: #ffffff;
-            margin: auto;
+            /* margin: auto; Removed, flex handles centering */
             padding: 2.5rem;
             border-radius: 1rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            max-width: 800px; /* Increased max-width for wider modal */
-            width: 90%; /* Responsive width */
+            max-width: 800px;
+            width: 90%;
             position: relative;
             max-height: 90vh; /* Limit height and allow scrolling */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
         }
         .close-button {
             color: #aaa;
-            float: right;
+            /* float: right; Removed, position: absolute is better */
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
@@ -164,17 +166,15 @@
     </style>
 </head>
 <body>
-    <!-- Initial Welcome/Login Screen -->
     <div id="initial-content-wrapper" class="content-card-style">
         <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome to MyPatriarch</h1>
         <p class="text-lg text-gray-600 mb-8">Click here to Login</p>
         <button id="show-login-btn-initial" class="btn-primary px-8 py-3 text-xl">Login</button>
     </div>
 
-    <!-- Login Modal -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('login-modal', 'initial-content-wrapper')">&times;</span>
+            <span class="close-button" id="login-modal-close-btn">&times;</span>
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Family Login</h2>
             <input type="email" id="login-email" placeholder="Family Email" required>
             <input type="password" id="login-password" placeholder="Family Password" required>
@@ -185,13 +185,10 @@
         </div>
     </div>
 
-    <!-- Profile Selection Modal (New Screen) -->
     <div id="profile-selection-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="handleLogout()">&times;</span> <!-- Logout from here -->
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Select Your Profile</h2>
+            <span class="close-button" id="profile-selection-close-btn">&times;</span> <h2 class="text-2xl font-semibold text-gray-800 mb-6">Select Your Profile</h2>
             <div id="profiles-list" class="space-y-4 mb-6">
-                <!-- Profiles will be dynamically loaded here -->
                 <p id="no-profiles-message" class="text-gray-500">No profiles found. Create one below!</p>
             </div>
             <button id="create-profile-btn" class="btn-primary w-full">Create New Profile</button>
@@ -199,10 +196,9 @@
         </div>
     </div>
 
-    <!-- Create Profile Modal -->
     <div id="create-profile-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('create-profile-modal', 'profile-selection-modal')">&times;</span>
+            <span class="close-button" id="create-profile-close-btn">&times;</span>
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Create New Profile</h2>
             <input type="text" id="new-profile-name" placeholder="Profile Name (e.g., John, Jane)" required>
             <input type="password" id="new-profile-pin" placeholder="Set a 4-digit PIN" maxlength="4" required>
@@ -214,10 +210,9 @@
         </div>
     </div>
 
-    <!-- Enter PIN Modal -->
     <div id="enter-pin-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal('enter-pin-modal', 'profile-selection-modal')">&times;</span>
+            <span class="close-button" id="enter-pin-close-btn">&times;</span>
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">Enter PIN for <span id="pin-profile-name"></span></h2>
             <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="4" required>
             <button id="submit-pin-btn" class="btn-primary w-full mb-2">Access Profile</button>
@@ -228,7 +223,6 @@
     </div>
 
 
-    <!-- Main Dashboard (hidden by default) -->
     <div id="main-dashboard" class="content-card-style">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">MyPatriarch Dashboard (<span id="current-profile-name-display"></span>)</h1>
@@ -239,7 +233,6 @@
             </div>
         </div>
 
-        <!-- Financial Data Input -->
         <div class="bg-gray-50 p-6 rounded-lg mb-8 text-left">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Inputs</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -301,7 +294,6 @@
             <p id="financial-save-message" class="text-green-600 text-sm mt-2 hidden"></p>
         </div>
 
-        <!-- Financial Summary -->
         <div class="bg-white p-6 rounded-lg shadow-md text-left mb-8">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Summary</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
@@ -323,7 +315,6 @@
             </div>
         </div>
 
-        <!-- Allocation Research -->
         <div class="bg-gray-50 p-6 rounded-lg text-left">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Allocation Research</h3>
             <p class="text-gray-700 mb-4">Get personalized allocation advice based on your disposable income.</p>
@@ -336,13 +327,11 @@
         </div>
     </div>
 
-    <!-- Initial Message Box for Firebase config -->
     <div id="firebase-config-message" class="message-box">
         <p class="text-lg text-gray-700">Firebase configuration is missing. Please ensure `__firebase_config` is defined.</p>
         <button onclick="document.getElementById('firebase-config-message').style.display='none'" class="btn-primary">OK</button>
     </div>
 
-    <!-- Message Box for general alerts -->
     <div id="general-message-box" class="message-box">
         <p id="general-message-text" class="text-lg text-gray-700"></p>
         <button onclick="document.getElementById('general-message-box').style.display='none'" class="btn-primary">OK</button>
@@ -355,7 +344,7 @@
         import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase config and app ID
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Removed as no longer used
         // HARDCODED FIREBASE CONFIGURATION AS REQUESTED
         const firebaseConfig = {
             apiKey: "AIzaSyCbmW_3fHbPHV-9raz8afJidmbgDFOqmVM",
@@ -392,77 +381,60 @@
             return hexHash;
         }
 
-
-        // Initialize Firebase
-        function initializeFirebase() {
-            console.log("App Init: Initializing Firebase...");
-            if (Object.keys(firebaseConfig).length === 0) {
-                console.error("App Init: Firebase config is empty. Cannot initialize Firebase.");
-                document.getElementById('firebase-config-message').style.display = 'block';
-                return;
-            }
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                setupAuthListener();
-                // Ensure the initial login screen is visible at start
-                initialContentWrapper.classList.remove('hidden');
-                initialContentWrapper.style.display = 'block';
-                console.log("App Init: Firebase initialized successfully with provided config.");
-            } catch (error) {
-                console.error("App Init: Error initializing Firebase:", error);
-                showMessage("Failed to initialize Firebase. Please try again later.");
-            }
-        }
-
-        // Function to show custom message box
-        function showMessage(message) {
-            const messageBox = document.getElementById('general-message-box');
-            document.getElementById('general-message-text').textContent = message;
-            messageBox.style.display = 'flex';
-        }
-
-        // Function to close modals and optionally open a new one
-        function closeModal(modalId, openNextElementId = null) {
-            document.getElementById(modalId).style.display = 'none';
-            console.log(`closeModal: Hidden ${modalId}`);
-            if (openNextElementId) {
-                const nextElement = document.getElementById(openNextElementId);
-                if (nextElement) {
-                    nextElement.classList.remove('hidden');
-                    // Explicitly set display for content cards to ensure they are visible as blocks
-                    if (nextElement.classList.contains('content-card-style')) {
-                        nextElement.style.display = 'block';
-                        console.log(`closeModal: Displayed ${openNextElementId} as block.`);
-                    } else {
-                        // Modals are handled by their own display: flex
-                        nextElement.style.display = 'flex';
-                        console.log(`closeModal: Displayed ${openNextElementId} as flex.`);
-                    }
-                }
-            }
-        }
-
-        // UI Element References
+        // --- UI Element References ---
         const initialContentWrapper = document.getElementById('initial-content-wrapper');
         const showLoginBtnInitial = document.getElementById('show-login-btn-initial');
+
         const loginModal = document.getElementById('login-modal');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
         const loginSubmitBtn = document.getElementById('login-submit-btn');
-        const logoutBtn = document.getElementById('logout-btn');
+        const loginBackBtn = document.getElementById('login-back-btn');
+        const loginModalCloseBtn = document.getElementById('login-modal-close-btn');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        const loginLoadingSpinner = document.getElementById('login-loading-spinner');
+
+        const profileSelectionModal = document.getElementById('profile-selection-modal');
+        const profileSelectionCloseBtn = document.getElementById('profile-selection-close-btn');
+        const profilesList = document.getElementById('profiles-list');
+        const noProfilesMessage = document.getElementById('no-profiles-message');
+        const createProfileBtn = document.getElementById('create-profile-btn');
+        const profileSelectionLoadingSpinner = document.getElementById('profile-selection-loading-spinner');
+
+        const createProfileModal = document.getElementById('create-profile-modal');
+        const createProfileCloseBtn = document.getElementById('create-profile-close-btn');
+        const newProfileNameInput = document.getElementById('new-profile-name');
+        const newProfilePinInput = document.getElementById('new-profile-pin');
+        const confirmNewProfilePinInput = document.getElementById('confirm-new-profile-pin');
+        const submitCreateProfileBtn = document.getElementById('submit-create-profile-btn');
+        const backToProfileSelectionBtn = document.getElementById('back-to-profile-selection-btn');
+        const createProfileErrorMessage = document.getElementById('create-profile-error-message');
+        const createProfileLoadingSpinner = document.getElementById('create-profile-loading-spinner');
+
+        const enterPinModal = document.getElementById('enter-pin-modal');
+        const enterPinCloseBtn = document.getElementById('enter-pin-close-btn');
+        const pinProfileNameDisplay = document.getElementById('pin-profile-name');
+        const pinInput = document.getElementById('pin-input');
+        const submitPinBtn = document.getElementById('submit-pin-btn');
+        const backFromPinBtn = document.getElementById('back-from-pin-btn');
+        const pinErrorMessage = document.getElementById('pin-error-message');
+        const pinLoadingSpinner = document.getElementById('pin-loading-spinner');
+
         const mainDashboard = document.getElementById('main-dashboard');
-        const userDisplayId = document.getElementById('user-display-id'); // Now displays currentAuthUserId
+        const logoutBtn = document.getElementById('logout-btn');
+        const switchProfileBtn = document.getElementById('switch-profile-btn');
+        const userDisplayId = document.getElementById('user-display-id');
         const currentProfileNameDisplay = document.getElementById('current-profile-name-display');
 
-        // New Financial Input Fields
-        const inputIncomePastTwoWeeks = document.getElementById('input-income-past-two-weeks');
-        const inputCarInsurance = document.getElementById('input-car-insurance');
-        const inputGasMoney = document.getElementById('input-gas-money');
-        const inputCreditCardDebt = document.getElementById('input-credit-card-debt'); // Already exists
         const oilChangeYesRadio = document.getElementById('oil-change-yes');
         const oilChangeNoRadio = document.getElementById('oil-change-no');
         const oilChangeInputContainer = document.getElementById('oil-change-input-container');
         const inputOilChangeMoney = document.getElementById('input-oil-change-money');
+
+        const inputIncomePastTwoWeeks = document.getElementById('input-income-past-two-weeks');
+        const inputCarInsurance = document.getElementById('input-car-insurance');
+        const inputGasMoney = document.getElementById('input-gas-money');
+        const inputCreditCardDebt = document.getElementById('input-credit-card-debt');
         const inputParking = document.getElementById('input-parking');
         const inputCarWash = document.getElementById('input-car-wash');
         const inputFunMoney = document.getElementById('input-fun-money');
@@ -473,7 +445,6 @@
         const saveFinancialDataBtn = document.getElementById('save-financial-data-btn');
         const financialSaveMessage = document.getElementById('financial-save-message');
 
-        // New Financial Display Fields
         const displayIncomePastTwoWeeks = document.getElementById('display-income-past-two-weeks');
         const displayCarInsurance = document.getElementById('display-car-insurance');
         const displayGasMoney = document.getElementById('display-gas-money');
@@ -486,67 +457,103 @@
         const displayOffering = document.getElementById('display-offering');
         const displayOtherCosts = document.getElementById('display-other-costs');
         const displayDisposableIncome = document.getElementById('display-disposable-income');
-
         const displayLastUpdated = document.getElementById('display-last-updated');
 
         const researchAllocationBtn = document.getElementById('research-allocation-btn');
         const allocationResultDiv = document.getElementById('allocation-result');
         const allocationText = document.getElementById('allocation-text');
-
-        const loginErrorMessage = document.getElementById('login-error-message');
-        const loginLoadingSpinner = document.getElementById('login-loading-spinner');
         const researchLoadingSpinner = document.getElementById('research-loading-spinner');
 
-        // Profile Selection UI elements
-        const profileSelectionModal = document.getElementById('profile-selection-modal');
-        const profilesList = document.getElementById('profiles-list');
-        const noProfilesMessage = document.getElementById('no-profiles-message');
-        const createProfileBtn = document.getElementById('create-profile-btn');
-        const profileSelectionLoadingSpinner = document.getElementById('profile-selection-loading-spinner');
-        const switchProfileBtn = document.getElementById('switch-profile-btn');
-
-        // Create Profile UI elements
-        const createProfileModal = document.getElementById('create-profile-modal');
-        const newProfileNameInput = document.getElementById('new-profile-name');
-        const newProfilePinInput = document.getElementById('new-profile-pin');
-        const confirmNewProfilePinInput = document.getElementById('confirm-new-profile-pin');
-        const submitCreateProfileBtn = document.getElementById('submit-create-profile-btn');
-        const backToProfileSelectionBtn = document.getElementById('back-to-profile-selection-btn');
-        const createProfileErrorMessage = document.getElementById('create-profile-error-message');
-        const createProfileLoadingSpinner = document.getElementById('create-profile-loading-spinner');
-
-        // Enter PIN UI elements
-        const enterPinModal = document.getElementById('enter-pin-modal');
-        const pinProfileNameDisplay = document.getElementById('pin-profile-name');
-        const pinInput = document.getElementById('pin-input');
-        const submitPinBtn = document.getElementById('submit-pin-btn');
-        const backFromPinBtn = document.getElementById('back-from-pin-btn');
-        const pinErrorMessage = document.getElementById('pin-error-message');
-        const pinLoadingSpinner = document.getElementById('pin-loading-spinner');
+        const generalMessageBox = document.getElementById('general-message-box');
+        const generalMessageText = document.getElementById('general-message-text');
+        const firebaseConfigMessage = document.getElementById('firebase-config-message');
 
         let selectedProfileForPin = null; // To store the profile being accessed for PIN entry
 
+        // --- Utility Functions ---
 
-        // Event Listeners
+        // Function to show custom message box
+        function showMessage(message) {
+            generalMessageText.textContent = message;
+            generalMessageBox.style.display = 'flex';
+        }
+
+        // Function to hide all main content screens
+        function hideAllScreens() {
+            initialContentWrapper.style.display = 'none';
+            loginModal.style.display = 'none';
+            profileSelectionModal.style.display = 'none';
+            createProfileModal.style.display = 'none';
+            enterPinModal.style.display = 'none';
+            mainDashboard.style.display = 'none';
+            console.log("UI: All main content screens hidden.");
+        }
+
+        // Function to display a specific screen
+        function showScreen(screenElement) {
+            hideAllScreens(); // Hide all first
+            if (screenElement.classList.contains('modal')) {
+                screenElement.style.display = 'flex';
+                console.log(`UI: Displaying modal: ${screenElement.id}`);
+            } else if (screenElement.classList.contains('content-card-style')) {
+                screenElement.style.display = 'block'; // Or 'flex' if you want its internal children to be flexed
+                console.log(`UI: Displaying content card: ${screenElement.id}`);
+            }
+        }
+
+        // --- Firebase Initialization ---
+        function initializeFirebase() {
+            console.log("App Init: Initializing Firebase...");
+            if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                console.error("App Init: Firebase config is empty or missing API Key. Cannot initialize Firebase.");
+                firebaseConfigMessage.style.display = 'block';
+                return;
+            }
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                setupAuthListener();
+                console.log("App Init: Firebase initialized successfully with provided config.");
+            } catch (error) {
+                console.error("App Init: Error initializing Firebase:", error);
+                showMessage("Failed to initialize Firebase. Please try again later.");
+                firebaseConfigMessage.style.display = 'flex'; // Show config message on error
+            }
+        }
+
+        // --- Event Listeners ---
         showLoginBtnInitial.addEventListener('click', () => {
-            console.log("Event: Initial Login button clicked. Hiding initial content, showing login modal.");
-            initialContentWrapper.classList.add('hidden'); // Hide initial screen
-            loginModal.style.display = 'flex';
+            console.log("Event: Initial Login button clicked. Showing login modal.");
+            showScreen(loginModal);
             loginErrorMessage.classList.add('hidden'); // Clear previous errors
+            loginEmailInput.value = ''; // Clear inputs
+            loginPasswordInput.value = '';
         });
 
-        // New back button for login modal
-        const loginBackBtn = document.getElementById('login-back-btn');
         loginBackBtn.addEventListener('click', () => {
-            console.log("Event: Login modal 'Go Back' button clicked. Closing login modal, showing initial content.");
-            closeModal('login-modal', 'initial-content-wrapper'); // Close login modal, show initial wrapper
+            console.log("Event: Login modal 'Go Back' button clicked. Showing initial content.");
+            showScreen(initialContentWrapper);
         });
 
-        // Update close button for login modal to also go back
-        document.querySelector('#login-modal .close-button').onclick = () => {
-            console.log("Event: Login modal close button clicked. Closing login modal, showing initial content.");
-            closeModal('login-modal', 'initial-content-wrapper');
-        };
+        loginModalCloseBtn.addEventListener('click', () => {
+            console.log("Event: Login modal close button clicked. Showing initial content.");
+            showScreen(initialContentWrapper);
+        });
+
+        profileSelectionCloseBtn.addEventListener('click', handleLogout); // Log out from profile selection close button
+
+        createProfileCloseBtn.addEventListener('click', () => {
+            console.log("Event: Create profile modal close button clicked. Showing profile selection.");
+            showScreen(profileSelectionModal);
+            loadProfiles(); // Reload profiles when going back
+        });
+
+        enterPinCloseBtn.addEventListener('click', () => {
+            console.log("Event: Enter PIN modal close button clicked. Showing profile selection.");
+            showScreen(profileSelectionModal);
+            pinInput.value = ''; // Clear PIN input
+        });
 
         // Event listener for Oil Change radio buttons
         oilChangeYesRadio.addEventListener('change', () => {
@@ -563,93 +570,86 @@
             }
         });
 
-
         loginSubmitBtn.addEventListener('click', handleLogin);
         logoutBtn.addEventListener('click', handleLogout);
         saveFinancialDataBtn.addEventListener('click', saveFinancialData);
         researchAllocationBtn.addEventListener('click', researchAllocation);
+
         createProfileBtn.addEventListener('click', () => {
-            console.log("Event: 'Create New Profile' button clicked. Hiding profile selection, showing create profile modal.");
-            closeModal('profile-selection-modal');
-            createProfileModal.style.display = 'flex';
+            console.log("Event: 'Create New Profile' button clicked. Showing create profile modal.");
+            showScreen(createProfileModal);
             createProfileErrorMessage.classList.add('hidden');
             newProfileNameInput.value = '';
             newProfilePinInput.value = '';
             confirmNewProfilePinInput.value = '';
         });
+
         submitCreateProfileBtn.addEventListener('click', handleCreateProfile);
+
         backToProfileSelectionBtn.addEventListener('click', () => {
-            console.log("Event: 'Back to Profile Selection' button clicked. Closing create profile, showing profile selection.");
-            closeModal('create-profile-modal', 'profile-selection-modal');
+            console.log("Event: 'Back to Profile Selection' button clicked. Showing profile selection.");
+            showScreen(profileSelectionModal);
             loadProfiles(); // Reload profiles when going back
         });
+
         submitPinBtn.addEventListener('click', handlePinEntry);
+
         backFromPinBtn.addEventListener('click', () => {
-            console.log("Event: 'Back from PIN' button clicked. Closing PIN entry, showing profile selection.");
-            closeModal('enter-pin-modal', 'profile-selection-modal');
+            console.log("Event: 'Back from PIN' button clicked. Showing profile selection.");
+            showScreen(profileSelectionModal);
             pinInput.value = ''; // Clear PIN input
         });
+
         switchProfileBtn.addEventListener('click', () => {
-            console.log("Event: 'Switch Profile' button clicked. Hiding dashboard, showing profile selection.");
-            mainDashboard.classList.add('hidden'); // Ensure dashboard is hidden before showing profile selection
-            mainDashboard.style.display = 'none'; // Explicitly hide
-            profileSelectionModal.style.display = 'flex';
+            console.log("Event: 'Switch Profile' button clicked. Showing profile selection.");
+            currentProfileId = null; // Clear current profile
+            currentProfileName = null;
+            showScreen(profileSelectionModal);
             loadProfiles(); // Reload profiles when switching
         });
 
+        // --- Firebase Authentication and Firestore Logic ---
 
-        // Firebase Authentication and Firestore Logic
         async function setupAuthListener() {
             onAuthStateChanged(auth, async (user) => {
+                console.log("Auth State: onAuthStateChanged triggered. User:", user ? user.uid : "null");
+
                 if (user) {
                     currentAuthUserId = user.uid;
-                    console.log("Auth State: User is logged in with UID:", user.uid);
+                    userDisplayId.textContent = `Family ID: ${PATRIARCH_FAMILY_ID}`;
 
-                    // Attempt to sign in with custom token if available (for Canvas environment)
-                    if (typeof __initial_auth_token !== 'undefined' && !isAuthReady) {
-                        try {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                            console.log("Auth State: Signed in with custom token.");
-                        } catch (error) {
-                            console.error("Auth State: Error signing in with custom token:", error);
-                            // Fallback to anonymous if custom token fails or is not provided
-                            await signInAnonymously(auth);
-                            console.log("Auth State: Signed in anonymously due to custom token failure.");
-                        }
-                    } else if (!isAuthReady && !auth.currentUser) {
-                        // If no custom token and no current user, sign in anonymously
-                        await signInAnonymously(auth);
-                        console.log("Auth State: Signed in anonymously.");
+                    // If it's the first time auth state is ready AND no specific user signed in (e.g., initial load)
+                    if (!isAuthReady && !auth.currentUser) {
+                        console.log("Auth State: First auth state check, user already present. Proceeding to profile selection.");
+                        showScreen(profileSelectionModal);
+                        loadProfiles();
+                    } else if (isAuthReady && !currentProfileId) { // User just logged in via email/password, or switched family accounts
+                        console.log("Auth State: User just logged in or family changed. Proceeding to profile selection.");
+                        showScreen(profileSelectionModal);
+                        loadProfiles();
+                    } else if (currentProfileId && mainDashboard.style.display === 'none') {
+                        // User is already authenticated and a profile is selected, but dashboard isn't shown
+                        console.log("Auth State: User authenticated, profile selected. Showing dashboard.");
+                        showScreen(mainDashboard);
+                        setupFinancialDataListener(currentProfileId);
                     }
-
-                    // After successful Firebase Auth login, show profile selection
-                    console.log("Auth State: Authenticated. Hiding initial/login, showing profile selection modal.");
-                    initialContentWrapper.classList.add('hidden'); // Hide initial screen
-                    initialContentWrapper.style.display = 'none';
-                    loginModal.style.display = 'none'; // Hide login modal
-                    profileSelectionModal.style.display = 'flex'; // Show profile selection
-                    loadProfiles(); // Load profiles for this family account
-
+                    isAuthReady = true; // Auth state has been checked
                 } else {
                     // User is signed out
-                    console.log("Auth State: User is logged out. Showing initial content, hiding others.");
+                    console.log("Auth State: User is logged out. Showing initial content.");
                     currentAuthUserId = null;
                     currentProfileId = null;
                     currentProfileName = null;
-                    initialContentWrapper.classList.remove('hidden'); // Show initial screen
-                    initialContentWrapper.style.display = 'block'; // Ensure it's block
-                    mainDashboard.classList.add('hidden'); // Hide dashboard
-                    mainDashboard.style.display = 'none';
-                    profileSelectionModal.style.display = 'none'; // Hide profile selection
-                    document.getElementById('show-login-btn-initial').classList.remove('hidden'); // Ensure initial login button is visible
+                    showScreen(initialContentWrapper); // Always go back to initial screen on logout
+                    // Clear displayed profile name if any
+                    currentProfileNameDisplay.textContent = '';
                 }
-                isAuthReady = true; // Auth state has been checked
             });
         }
 
         async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
 
             loginErrorMessage.classList.add('hidden');
             loginLoadingSpinner.style.display = 'block';
@@ -664,21 +664,21 @@
             }
 
             try {
-                // Attempt to sign in with provided credentials
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log("Login Handler: signInWithEmailAndPassword successful. UID:", userCredential.user.uid);
                 showMessage("Family login successful! Please select your profile.");
-                // onAuthStateChanged listener will handle the UI transition
+                // The onAuthStateChanged listener will handle the UI transition to profile selection
             } catch (error) {
                 console.error("Login Handler: Error during login:", error);
                 let errorMessage = "Login failed. Please check your family credentials.";
 
-                // If the error is user-not-found AND it's the patriarch's credentials, attempt to create
+                // Special handling for patriarch's initial setup
                 if (error.code === 'auth/user-not-found' && email === PATRIARCH_EMAIL && password === PATRIARCH_PASSWORD) {
                     try {
                         console.log("Login Handler: Patriarch user not found, attempting to create...");
                         const userCredential = await createUserWithEmailAndPassword(auth, PATRIARCH_EMAIL, PATRIARCH_PASSWORD);
                         // Also create the Firestore user document immediately after creation
+                        const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
                         await setDoc(doc(db, `artifacts/${appId}/public/data/users`, userCredential.user.uid), {
                             uid: userCredential.user.uid,
                             email: PATRIARCH_EMAIL,
@@ -691,13 +691,14 @@
                         // onAuthStateChanged listener will pick up this new login state and transition UI
                     } catch (createError) {
                         console.error("Login Handler: Error creating patriarch account:", createError);
-                        errorMessage = "Failed to create patriarch account. It might already exist or there's a Firebase configuration issue.";
                         if (createError.code === 'auth/email-already-in-use') {
                             errorMessage = "Patriarch account already exists. Please try logging in again.";
                         } else if (createError.code === 'auth/weak-password') {
                             errorMessage = "Patriarch password is too weak. (This should not happen with predefined password).";
                         } else if (createError.code === 'auth/operation-not-allowed') {
-                            errorMessage = "Email/Password sign-up is not enabled in your Firebase project. Please enable it in Firebase Console > Authentication > Sign-in method.";
+                            errorMessage = "Email/Password sign-up is not enabled for your Firebase project.";
+                        } else {
+                            errorMessage = `Failed to create patriarch account: ${createError.message}`;
                         }
                     }
                 } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -705,7 +706,7 @@
                 } else if (error.code === 'auth/invalid-email') {
                     errorMessage = "Invalid email format.";
                 } else if (error.code === 'auth/operation-not-allowed') {
-                    errorMessage = "Email/Password sign-in is not enabled in your Firebase project. Please enable it in Firebase Console > Authentication > Sign-in method.";
+                    errorMessage = "Email/Password sign-in is not enabled for your Firebase project.";
                 }
                 loginErrorMessage.textContent = errorMessage;
                 loginErrorMessage.classList.remove('hidden');
@@ -727,7 +728,7 @@
             }
         }
 
-        // Profile Management Functions
+        // --- Profile Management Functions ---
         async function loadProfiles() {
             if (!currentAuthUserId) {
                 console.warn("Load Profiles: Cannot load profiles: No authenticated family user ID.");
@@ -741,6 +742,7 @@
             console.log("Load Profiles: Loading profiles for ownerAuthUid:", currentAuthUserId);
 
             try {
+                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
                 const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`), where("ownerAuthUid", "==", currentAuthUserId));
                 const querySnapshot = await getDocs(q);
 
@@ -763,8 +765,7 @@
                             selectedProfileForPin = { id: doc.id, name: profileData.name, pinHash: profileData.pinHash };
                             pinProfileNameDisplay.textContent = profileData.name;
                             console.log("Load Profiles: Profile selected for PIN entry:", profileData.name);
-                            closeModal('profile-selection-modal');
-                            enterPinModal.style.display = 'flex';
+                            showScreen(enterPinModal);
                             pinInput.value = ''; // Clear previous PIN
                             pinErrorMessage.classList.add('hidden');
                         });
@@ -820,6 +821,7 @@
             }
 
             try {
+                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
                 // Check if a profile with this name already exists for this family
                 const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`),
                                 where("ownerAuthUid", "==", currentAuthUserId),
@@ -860,7 +862,7 @@
                 });
 
                 showMessage(`Profile "${profileName}" created successfully!`);
-                closeModal('create-profile-modal', 'profile-selection-modal');
+                showScreen(profileSelectionModal); // Go back to profile selection
                 loadProfiles(); // Reload profiles to show the new one
                 console.log("Create Profile Handler: Profile created successfully:", profileName);
             } catch (error) {
@@ -901,14 +903,7 @@
                     currentProfileId = selectedProfileForPin.id;
                     currentProfileName = selectedProfileForPin.name;
                     showMessage(`Welcome, ${currentProfileName}!`);
-                    closeModal('enter-pin-modal');
-                    profileSelectionModal.style.display = 'none'; // Explicitly hide profile selection modal
-                    initialContentWrapper.classList.add('hidden'); // Ensure initial screen is hidden
-                    initialContentWrapper.style.display = 'none'; // Explicitly hide
-                    mainDashboard.classList.remove('hidden'); // Show dashboard
-                    mainDashboard.style.display = 'block'; // Explicitly ensure it's rendered as a block element
-
-                    userDisplayId.textContent = `Family ID: ${PATRIARCH_FAMILY_ID}`; // Display the fixed family ID
+                    showScreen(mainDashboard); // Show dashboard
                     currentProfileNameDisplay.textContent = currentProfileName; // Display the selected profile name
                     setupFinancialDataListener(currentProfileId); // Start listening for this profile's financial data
                     console.log("PIN Entry Handler: PIN entry successful. Dashboard loaded for profile:", currentProfileName);
@@ -934,6 +929,7 @@
                 return;
             }
             console.log("Financial Data Listener: Setting up financial data listener for profile ID:", profileId);
+            const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
             // Financial data is now stored directly within the profile document
             const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, profileId);
 
@@ -1047,11 +1043,14 @@
             };
 
             try {
+                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
                 // Update the financialData field within the specific profile document
                 const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, currentProfileId);
                 await updateDoc(profileDocRef, { financialData: dataToSave });
                 financialSaveMessage.textContent = "Financial data saved successfully!";
                 financialSaveMessage.classList.remove('hidden');
+                financialSaveMessage.classList.add('text-green-600'); // Ensure green on success
+                financialSaveMessage.classList.remove('text-red-500'); // Remove red if previously error
                 setTimeout(() => financialSaveMessage.classList.add('hidden'), 3000);
                 console.log("Save Financial Data: Financial data saved successfully.");
             } catch (error) {
@@ -1116,6 +1115,8 @@
                 - Crypto
                 - Stocks
 
+                Remember, we **cannot trade stable assets** (like stablecoins or other pegged assets) for investments. Focus on growth opportunities.
+
                 Provide actionable advice and explain the reasoning behind your recommendations.
                 Present the allocation plan in a clear, well-structured, and nicely formatted way, perhaps using bullet points or a table for the breakdown.
                 Focus on security and long-term financial health for a nuclear family.
@@ -1124,7 +1125,7 @@
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will provide this automatically
+            const apiKey = firebaseConfig.apiKey; // Use Firebase API key for Gemini
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             try {
@@ -1143,7 +1144,7 @@
                     allocationResultDiv.classList.remove('hidden');
                     console.log("Research Allocation: Allocation advice received successfully.");
                 } else {
-                    showMessage("Failed to get allocation advice. No response from AI.");
+                    showMessage("Failed to get allocation advice. No response from AI or unexpected format.");
                     console.error("Research Allocation: LLM response structure unexpected:", result);
                 }
             } catch (error) {
