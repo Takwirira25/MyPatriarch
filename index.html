@@ -133,6 +133,29 @@
         #cashCushionProgressBar {
             transition: width 0.5s ease-in-out;
         }
+        /* Go to Top Button */
+        #goToTopBtn {
+            display: none; /* Hidden by default */
+            position: fixed; /* Fixed position */
+            bottom: 20px; /* Place at the bottom */
+            right: 30px; /* Place at the right */
+            z-index: 99; /* Make sure it's on top */
+            border: none; /* Remove borders */
+            outline: none; /* Remove outline */
+            background-color: #6366f1; /* Set a background color */
+            color: white; /* Text color */
+            cursor: pointer; /* Add a mouse pointer on hover */
+            padding: 15px; /* Some padding */
+            border-radius: 10px; /* Rounded corners */
+            font-size: 18px; /* Increase font size */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        #goToTopBtn:hover {
+            background-color: #4f46e5; /* Add a dark-grey background on hover */
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -185,8 +208,19 @@
                 </div>
             </div>
 
+            <!-- Navigation Buttons for Sections -->
+            <div class="card p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <button id="toggleIncomeBtn" class="btn-primary">Toggle Income</button>
+                <button id="toggleExpensesBtn" class="btn-primary">Toggle Expenses</button>
+                <button id="toggleRandomExpensesBtn" class="btn-primary">Toggle Random Expenses</button>
+                <button id="togglePortfolioAllocationBtn" class="btn-primary">Toggle Portfolio Allocation</button>
+                <button id="toggleAssetValuesBtn" class="btn-primary">Toggle Current Asset Values</button>
+                <button id="toggleProjectedValueBtn" class="btn-primary">Toggle Projected Value</button>
+                <button id="toggleCashCushionBtn" class="btn-primary">Toggle Cash Cushion</button>
+            </div>
+
             <!-- Income Section -->
-            <div class="card p-6">
+            <div id="incomeSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Bi-Weekly Income</h2>
                 <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <input type="number" id="biWeeklyIncomeInput" placeholder="Enter bi-weekly income" class="flex-grow">
@@ -198,7 +232,7 @@
             </div>
 
             <!-- Expenses Section -->
-            <div class="card p-6">
+            <div id="expensesSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Monthly Expenses</h2>
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -219,7 +253,7 @@
             </div>
 
             <!-- Random Expenses Section -->
-            <div class="card p-6">
+            <div id="randomExpensesSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Random Expenses (Bi-Weekly)</h2>
                 <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <input type="number" id="randomExpenseInput" placeholder="Enter random expense amount" class="flex-grow">
@@ -230,14 +264,14 @@
                 <p id="randomExpenseError" class="error-message hidden"></p>
             </div>
 
-            <!-- Net Income Section -->
-            <div class="card p-6 bg-indigo-50">
+            <!-- Net Income Section (Always visible once logged in for summary) -->
+            <div id="netIncomeSection" class="card p-6 bg-indigo-50">
                 <h2 class="text-2xl font-semibold text-indigo-800 mb-4">Financial Summary</h2>
                 <p class="text-xl font-bold text-indigo-700">Net Income (Bi-Weekly): <span id="netIncome" class="font-extrabold">$0.00</span></p>
             </div>
 
             <!-- Portfolio Allocation Section -->
-            <div class="card p-6">
+            <div id="portfolioAllocationSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Portfolio Allocation</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -270,7 +304,7 @@
             </div>
 
             <!-- Current Asset Values Section -->
-            <div class="card p-6">
+            <div id="assetValuesSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Current Asset Values</h2>
                 <p class="text-sm text-gray-600 mb-4">Enter the current market value of your assets to calculate your net worth.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,14 +328,14 @@
                 <span id="assetValuesStatus" class="success-message hidden"></span>
             </div>
 
-            <!-- Current Net Worth Section -->
-            <div class="card p-6 bg-purple-50">
+            <!-- Current Net Worth Section (Always visible once logged in for summary) -->
+            <div id="netWorthSection" class="card p-6 bg-purple-50">
                 <h2 class="text-2xl font-semibold text-purple-800 mb-4">Current Net Worth</h2>
                 <p class="text-xl font-bold text-purple-700">Total Net Worth: <span id="totalNetWorth" class="font-extrabold">$0.00</span></p>
             </div>
 
             <!-- Projected Portfolio Value Section -->
-            <div class="card p-6 bg-blue-50">
+            <div id="projectedValueSection" class="card p-6 hidden">
                 <h2 class="text-2xl font-semibold text-blue-800 mb-4">Projected Portfolio Value</h2>
                 <p class="text-sm text-gray-600 mb-4">Enter your expected annual growth rates to see future projections.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -336,7 +370,7 @@
             </div>
 
             <!-- Cash Cushion Section -->
-            <div class="card p-6 bg-green-50">
+            <div id="cashCushionSection" class="card p-6 bg-green-50 hidden">
                 <h2 class="text-2xl font-semibold text-green-800 mb-4">Emergency Fund (Cash Cushion)</h2>
                 <p class="text-lg text-green-700">Target: <span class="font-bold">$20,000.00</span> in 2 years.</p>
                 <p class="text-lg text-green-700">Monthly Target: <span class="font-bold">$833.33</span></p>
@@ -358,6 +392,9 @@
                 </div>
             </div>
         </div> <!-- End of mainAppContent -->
+
+        <!-- Go to Top Button -->
+        <button onclick="goToTop()" id="goToTopBtn" title="Go to top">Top</button>
 
         <!-- Modal for Rename Expense -->
         <div id="renameModal" class="modal">
@@ -430,6 +467,27 @@
         const authPasswordError = document.getElementById('authPasswordError');
         const logoutBtn = document.getElementById('logoutBtn');
 
+        // Section elements
+        const incomeSection = document.getElementById('incomeSection');
+        const expensesSection = document.getElementById('expensesSection');
+        const randomExpensesSection = document.getElementById('randomExpensesSection');
+        const netIncomeSection = document.getElementById('netIncomeSection'); // This will remain always visible
+        const portfolioAllocationSection = document.getElementById('portfolioAllocationSection');
+        const assetValuesSection = document.getElementById('assetValuesSection');
+        const netWorthSection = document.getElementById('netWorthSection'); // This will remain always visible
+        const projectedValueSection = document.getElementById('projectedValueSection');
+        const cashCushionSection = document.getElementById('cashCushionSection');
+
+        // Toggle Buttons
+        const toggleIncomeBtn = document.getElementById('toggleIncomeBtn');
+        const toggleExpensesBtn = document.getElementById('toggleExpensesBtn');
+        const toggleRandomExpensesBtn = document.getElementById('toggleRandomExpensesBtn');
+        const togglePortfolioAllocationBtn = document.getElementById('togglePortfolioAllocationBtn');
+        const toggleAssetValuesBtn = document.getElementById('toggleAssetValuesBtn');
+        const toggleProjectedValueBtn = document.getElementById('toggleProjectedValueBtn');
+        const toggleCashCushionBtn = document.getElementById('toggleCashCushionBtn');
+
+
         const biWeeklyIncomeInput = document.getElementById('biWeeklyIncomeInput');
         const saveIncomeBtn = document.getElementById('saveIncomeBtn');
         const currentBiWeeklyIncomeSpan = document.getElementById('currentBiWeeklyIncome');
@@ -456,7 +514,6 @@
         const netIncomeSpan = document.getElementById('netIncome');
 
         const cryptoAllocationInput = document.getElementById('cryptoAllocation');
-        // FIX: Corrected typo here. Was 'document = document.getElementById'
         const stocksAllocationInput = document.getElementById('stocksAllocation');
         const cashMutualFundsAllocationInput = document.getElementById('cashMutualFundsAllocation');
         const saveAllocationBtn = document.getElementById('saveAllocationBtn');
@@ -504,6 +561,8 @@
 
         const userIdDisplay = document.getElementById('userIdDisplay');
         const dataTypeRadios = document.querySelectorAll('input[name="dataType"]');
+
+        const goToTopBtn = document.getElementById("goToTopBtn");
 
         // Modals
         const renameModal = document.getElementById('renameModal');
@@ -672,6 +731,14 @@
                     hideButtonLoading(confirmRenameBtn);
                 }
             }
+        }
+
+        /**
+         * Toggles the visibility of a given section.
+         * @param {HTMLElement} sectionElement - The section element to toggle.
+         */
+        function toggleSection(sectionElement) {
+            sectionElement.classList.toggle('hidden');
         }
 
         /**
@@ -1406,6 +1473,23 @@
             cashCushionProgressText.textContent = `${Math.min(100, progressPercentage).toFixed(0)}% of target achieved.`;
         }
 
+        // Go to Top functionality
+        window.onscroll = function() { scrollFunction() };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                goToTopBtn.style.display = "block";
+            } else {
+                goToTopBtn.style.display = "none";
+            }
+        }
+
+        function goToTop() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+        window.goToTop = goToTop; // Make it globally accessible for onclick
+
         // Event Listeners for Authentication
         signUpBtn.addEventListener('click', handleSignUp);
         loginBtn.addEventListener('click', handleLogin);
@@ -1452,6 +1536,16 @@
                 confirmationCallback();
             }
         });
+
+        // Event Listeners for Section Toggles
+        toggleIncomeBtn.addEventListener('click', () => toggleSection(incomeSection));
+        toggleExpensesBtn.addEventListener('click', () => toggleSection(expensesSection));
+        toggleRandomExpensesBtn.addEventListener('click', () => toggleSection(randomExpensesSection));
+        togglePortfolioAllocationBtn.addEventListener('click', () => toggleSection(portfolioAllocationSection));
+        toggleAssetValuesBtn.addEventListener('click', () => toggleSection(assetValuesSection));
+        toggleProjectedValueBtn.addEventListener('click', () => toggleSection(projectedValueSection));
+        toggleCashCushionBtn.addEventListener('click', () => toggleSection(cashCushionSection));
+
 
         // Initialize Firebase on window load
         window.onload = initializeFirebase;
