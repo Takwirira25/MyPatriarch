@@ -515,17 +515,19 @@
         }
 
         /**
-         * Displays a temporary success message.
+         * Displays a temporary success or error message.
          * @param {HTMLElement} statusElement - The span element to display the message.
          * @param {string} message - The message to display.
+         * @param {boolean} isSuccess - True for success, false for error.
          */
         function showStatusMessage(statusElement, message, isSuccess = true) {
             statusElement.textContent = message;
-            statusElement.classList.remove('hidden', isSuccess ? 'error-message' : 'success-message');
+            statusElement.classList.remove('hidden', 'success-message', 'error-message'); // Clear both
             statusElement.classList.add(isSuccess ? 'success-message' : 'error-message');
+            // Make error messages stay longer
             setTimeout(() => {
                 statusElement.classList.add('hidden');
-            }, 3000); // Hide after 3 seconds
+            }, isSuccess ? 3000 : 5000); // Shorter for success, longer for error
         }
 
         /**
@@ -625,7 +627,6 @@
          */
         async function initializeFirebase() {
             try {
-                // No global loading overlay, individual section loading will handle feedback
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -763,6 +764,10 @@
          * Saves the bi-weekly income to Firestore.
          */
         async function saveBiWeeklyIncome() {
+            if (!userId) {
+                showStatusMessage(incomeStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(biWeeklyIncomeInput, incomeError);
             const amount = parseFloat(biWeeklyIncomeInput.value);
             if (isNaN(amount) || amount < 0) {
@@ -776,7 +781,7 @@
                 biWeeklyIncomeInput.value = '';
                 showStatusMessage(incomeStatus, 'Saved!');
             } catch (error) {
-                console.error("Error saving bi-weekly income:", error);
+                console.error("Error saving bi-weekly income:", error.message || error); // Log specific error message
                 showStatusMessage(incomeStatus, 'Save failed!', false);
             } finally {
                 hideButtonLoading(saveIncomeBtn);
@@ -794,6 +799,10 @@
          * Adds a new monthly expense to Firestore.
          */
         async function addExpense() {
+            if (!userId) {
+                showStatusMessage(expenseStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(expenseNameInput, expenseNameError);
             clearInputError(expenseAmountInput, expenseAmountError);
 
@@ -819,7 +828,7 @@
                 expenseAmountInput.value = '';
                 showStatusMessage(expenseStatus, 'Added!');
             } catch (error) {
-                console.error("Error adding expense:", error);
+                console.error("Error adding expense:", error.message || error); // Log specific error message
                 showStatusMessage(expenseStatus, 'Add failed!', false);
             } finally {
                 hideButtonLoading(addExpenseBtn);
@@ -866,13 +875,11 @@
                 "Are you sure you want to remove this expense?",
                 async () => {
                     try {
-                        // No specific button to show loading for, as it's a modal action
                         const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
                         await deleteDoc(expenseDocRef);
                         console.log("Expense removed successfully.");
                     } catch (error) {
-                        console.error("Error removing expense:", error);
-                        // Potentially show an error in the main expense section status
+                        console.error("Error removing expense:", error.message || error);
                         showStatusMessage(expenseStatus, 'Removal failed!', false);
                     } finally {
                         hideConfirmationModal();
@@ -887,12 +894,17 @@
          * @param {string} newName - The new name for the expense.
          */
         async function renameExpense(expenseId, newName) {
+            if (!userId) {
+                showStatusMessage(renameStatus, 'App not ready. Please wait.', false);
+                throw new Error('User not authenticated for rename.'); // Re-throw to be caught by handleRenameConfirm
+            }
             try {
                 const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
                 await updateDoc(expenseDocRef, { name: newName });
                 console.log("Expense renamed successfully.");
             } catch (error) {
-                throw error; // Re-throw to be caught by handleRenameConfirm
+                console.error("Error renaming expense:", error.message || error);
+                throw error;
             }
         }
 
@@ -900,6 +912,10 @@
          * Adds a random expense amount to Firestore.
          */
         async function addRandomExpense() {
+            if (!userId) {
+                showStatusMessage(randomExpenseStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(randomExpenseInput, randomExpenseError);
             const amount = parseFloat(randomExpenseInput.value);
             if (isNaN(amount) || amount < 0) {
@@ -915,7 +931,7 @@
                 randomExpenseInput.value = '';
                 showStatusMessage(randomExpenseStatus, 'Added!');
             } catch (error) {
-                console.error("Error adding random expense:", error);
+                console.error("Error adding random expense:", error.message || error);
                 showStatusMessage(randomExpenseStatus, 'Add failed!', false);
             } finally {
                 hideButtonLoading(addRandomExpenseBtn);
@@ -943,10 +959,14 @@
          * Saves the portfolio allocation percentages to Firestore.
          */
         async function savePortfolioAllocation() {
+            if (!userId) {
+                showStatusMessage(allocationStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(cryptoAllocationInput, cryptoAllocationError);
             clearInputError(stocksAllocationInput, stocksAllocationError);
             clearInputError(cashMutualFundsAllocationInput, cashMutualFundsAllocationError);
-            clearInputError(saveAllocationBtn, totalAllocationError); // Clear total error
+            clearInputError(saveAllocationBtn, totalAllocationError);
 
             const crypto = parseFloat(cryptoAllocationInput.value || 0);
             const stocks = parseFloat(stocksAllocationInput.value || 0);
@@ -970,7 +990,7 @@
                 await setDoc(allocationDocRef, { crypto, stocks, cashMutualFunds }, { merge: true });
                 showStatusMessage(allocationStatus, 'Saved!');
             } catch (error) {
-                console.error("Error saving portfolio allocation:", error);
+                console.error("Error saving portfolio allocation:", error.message || error);
                 showStatusMessage(allocationStatus, 'Save failed!', false);
             } finally {
                 hideButtonLoading(saveAllocationBtn);
@@ -994,6 +1014,10 @@
          * Saves the current asset values to Firestore.
          */
         async function saveAssetValues() {
+            if (!userId) {
+                showStatusMessage(assetValuesStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(currentCryptoValueInput, currentCryptoValueError);
             clearInputError(currentStocksValueInput, currentStocksValueError);
             clearInputError(currentCashMutualFundsValueInput, currentCashMutualFundsValueError);
@@ -1018,7 +1042,7 @@
                 }, { merge: true });
                 showStatusMessage(assetValuesStatus, 'Saved!');
             } catch (error) {
-                console.error("Error saving asset values:", error);
+                console.error("Error saving asset values:", error.message || error);
                 showStatusMessage(assetValuesStatus, 'Save failed!', false);
             } finally {
                 hideButtonLoading(saveAssetValuesBtn);
@@ -1046,6 +1070,10 @@
          * Saves the annual growth rates to Firestore.
          */
         async function saveGrowthRates() {
+            if (!userId) {
+                showStatusMessage(growthRatesStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(annualCryptoGrowthInput, annualCryptoGrowthError);
             clearInputError(annualStocksGrowthInput, annualStocksGrowthError);
             clearInputError(annualCashMutualFundsGrowthInput, annualCashMutualFundsGrowthError);
@@ -1070,7 +1098,7 @@
                 }, { merge: true });
                 showStatusMessage(growthRatesStatus, 'Saved!');
             } catch (error) {
-                console.error("Error saving growth rates:", error);
+                console.error("Error saving growth rates:", error.message || error);
                 showStatusMessage(growthRatesStatus, 'Save failed!', false);
             } finally {
                 hideButtonLoading(saveGrowthRatesBtn);
@@ -1119,6 +1147,10 @@
          * Updates the current cash cushion amount in Firestore.
          */
         async function updateCashCushion() {
+            if (!userId) {
+                showStatusMessage(cashCushionStatus, 'App not ready. Please wait.', false);
+                return;
+            }
             clearInputError(currentCashCushionInput, cashCushionError);
             const amount = parseFloat(currentCashCushionInput.value);
             if (isNaN(amount) || amount < 0) {
@@ -1132,7 +1164,7 @@
                 currentCashCushionInput.value = '';
                 showStatusMessage(cashCushionStatus, 'Updated!');
             } catch (error) {
-                console.error("Error updating cash cushion:", error);
+                console.error("Error updating cash cushion:", error.message || error);
                 showStatusMessage(cashCushionStatus, 'Update failed!', false);
             } finally {
                 hideButtonLoading(updateCashCushionBtn);
