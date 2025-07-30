@@ -19,14 +19,14 @@
             margin: 0 auto;
             padding: 1.5rem;
         }
-        input[type="number"], input[type="text"] {
+        input[type="number"], input[type="text"], input[type="email"], input[type="password"] {
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             border: 1px solid #d1d5db;
             width: 100%;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s; /* Added transition for polish */
         }
-        input[type="number"]:focus, input[type="text"]:focus {
+        input[type="number"]:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
             outline: none;
             border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
@@ -36,11 +36,12 @@
             border-radius: 0.5rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s; /* Added box-shadow transition */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         button:hover {
             transform: translateY(-1px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhanced hover shadow */
         }
         .btn-primary {
             background-color: #6366f1;
@@ -128,205 +129,235 @@
             font-size: 0.875rem; /* text-sm */
             margin-left: 0.5rem; /* ml-2 */
         }
+        /* Smooth progress bar transition */
+        #cashCushionProgressBar {
+            transition: width 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
     <div class="container space-y-6">
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Asset Management Dashboard</h1>
 
-        <!-- User ID Display -->
-        <div class="card p-4 flex items-center justify-between">
-            <p class="text-lg font-semibold text-gray-700">Your User ID:</p>
-            <span id="userIdDisplay" class="text-sm font-mono bg-gray-100 p-2 rounded-md text-gray-600">Loading...</span>
-        </div>
+        <!-- Authentication Section -->
+        <div id="authSection" class="card p-6 space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Welcome, Patriarch!</h2>
+            <p class="text-center text-gray-600 mb-6">Sign up or log in to manage your assets.</p>
 
-        <!-- Data Type Selector -->
-        <div class="card p-6 flex items-center justify-between">
-            <h2 class="text-2xl font-semibold text-gray-800">Data Type</h2>
-            <div class="flex items-center space-x-4">
-                <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio text-indigo-600" name="dataType" value="real" checked>
-                    <span class="ml-2 text-gray-700">Real Data</span>
-                </label>
-                <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio text-indigo-600" name="dataType" value="simulation">
-                    <span class="ml-2 text-gray-700">Simulation Data</span>
-                </label>
+            <div>
+                <label for="authEmail" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" id="authEmail" placeholder="Enter your email">
+                <p id="authEmailError" class="error-message hidden"></p>
             </div>
-        </div>
-
-        <!-- Income Section -->
-        <div class="card p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Bi-Weekly Income</h2>
-            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <input type="number" id="biWeeklyIncomeInput" placeholder="Enter bi-weekly income" class="flex-grow">
-                <button id="saveIncomeBtn" class="btn-primary w-full sm:w-auto">Save Income</button>
-                <span id="incomeStatus" class="success-message hidden"></span>
+            <div>
+                <label for="authPassword" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" id="authPassword" placeholder="Enter your password">
+                <p id="authPasswordError" class="error-message hidden"></p>
             </div>
-            <p class="mt-4 text-lg text-gray-700">Current Bi-Weekly Income: <span id="currentBiWeeklyIncome" class="font-medium">$0.00</span></p>
-            <p id="incomeError" class="error-message hidden"></p>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <button id="signUpBtn" class="btn-primary flex-grow">Sign Up</button>
+                <button id="loginBtn" class="btn-secondary flex-grow">Log In</button>
+            </div>
+            <p id="authStatus" class="error-message text-center hidden"></p>
         </div>
 
-        <!-- Expenses Section -->
-        <div class="card p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Monthly Expenses</h2>
-            <div class="space-y-4">
+        <!-- Main App Content (Hidden until authenticated) -->
+        <div id="mainAppContent" class="hidden space-y-6">
+            <!-- User ID Display and Logout -->
+            <div class="card p-4 flex items-center justify-between">
+                <p class="text-lg font-semibold text-gray-700">Logged in as:</p>
+                <span id="userIdDisplay" class="text-lg font-bold text-indigo-700">@Patriarch</span>
+                <button id="logoutBtn" class="btn-secondary text-sm">Logout</button>
+            </div>
+
+            <!-- Data Type Selector -->
+            <div class="card p-6 flex items-center justify-between">
+                <h2 class="text-2xl font-semibold text-gray-800">Data Type</h2>
+                <div class="flex items-center space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" class="form-radio text-indigo-600" name="dataType" value="real" checked>
+                        <span class="ml-2 text-gray-700">Real Data</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" class="form-radio text-indigo-600" name="dataType" value="simulation">
+                        <span class="ml-2 text-gray-700">Simulation Data</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Income Section -->
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Bi-Weekly Income</h2>
                 <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <input type="text" id="expenseNameInput" placeholder="Expense Name" class="flex-grow">
-                    <input type="number" id="expenseAmountInput" placeholder="Amount" class="flex-grow">
-                    <button id="addExpenseBtn" class="btn-primary w-full sm:w-auto">Add Expense</button>
-                    <span id="expenseStatus" class="success-message hidden"></span>
+                    <input type="number" id="biWeeklyIncomeInput" placeholder="Enter bi-weekly income" class="flex-grow">
+                    <button id="saveIncomeBtn" class="btn-primary w-full sm:w-auto">Save Income</button>
+                    <span id="incomeStatus" class="success-message hidden"></span>
                 </div>
-                <p id="expenseNameError" class="error-message hidden"></p>
-                <p id="expenseAmountError" class="error-message hidden"></p>
-                <div id="expensesList" class="space-y-2">
-                    <!-- Expenses will be listed here -->
-                    <p class="text-gray-500 text-center" id="noExpensesMessage">No expenses added yet.</p>
-                </div>
+                <p class="mt-4 text-lg text-gray-700">Current Bi-Weekly Income: <span id="currentBiWeeklyIncome" class="font-medium">$0.00</span></p>
+                <p id="incomeError" class="error-message hidden"></p>
             </div>
-            <p class="mt-6 text-lg text-gray-700">Total Monthly Expenses: <span id="totalMonthlyExpenses" class="font-medium">$0.00</span></p>
-            <p class="text-lg text-gray-700">Bi-Weekly Allocation for Monthly Expenses: <span id="biWeeklyExpenseAllocation" class="font-medium">$0.00</span></p>
-        </div>
 
-        <!-- Random Expenses Section -->
-        <div class="card p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Random Expenses (Bi-Weekly)</h2>
-            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <input type="number" id="randomExpenseInput" placeholder="Enter random expense amount" class="flex-grow">
-                <button id="addRandomExpenseBtn" class="btn-primary w-full sm:w-auto">Add Random Expense</button>
-                <span id="randomExpenseStatus" class="success-message hidden"></span>
+            <!-- Expenses Section -->
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Monthly Expenses</h2>
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <input type="text" id="expenseNameInput" placeholder="Expense Name" class="flex-grow">
+                        <input type="number" id="expenseAmountInput" placeholder="Amount" class="flex-grow">
+                        <button id="addExpenseBtn" class="btn-primary w-full sm:w-auto">Add Expense</button>
+                        <span id="expenseStatus" class="success-message hidden"></span>
+                    </div>
+                    <p id="expenseNameError" class="error-message hidden"></p>
+                    <p id="expenseAmountError" class="error-message hidden"></p>
+                    <div id="expensesList" class="space-y-2">
+                        <!-- Expenses will be listed here -->
+                        <p class="text-gray-500 text-center" id="noExpensesMessage">No expenses added yet.</p>
+                    </div>
+                </div>
+                <p class="mt-6 text-lg text-gray-700">Total Monthly Expenses: <span id="totalMonthlyExpenses" class="font-medium">$0.00</span></p>
+                <p class="text-lg text-gray-700">Bi-Weekly Allocation for Monthly Expenses: <span id="biWeeklyExpenseAllocation" class="font-medium">$0.00</span></p>
             </div>
-            <p class="mt-4 text-lg text-gray-700">Current Random Expenses: <span id="currentRandomExpenses" class="font-medium">$0.00</span></p>
-            <p id="randomExpenseError" class="error-message hidden"></p>
-        </div>
 
-        <!-- Net Income Section -->
-        <div class="card p-6 bg-indigo-50">
-            <h2 class="text-2xl font-semibold text-indigo-800 mb-4">Financial Summary</h2>
-            <p class="text-xl font-bold text-indigo-700">Net Income (Bi-Weekly): <span id="netIncome" class="font-extrabold">$0.00</span></p>
-        </div>
+            <!-- Random Expenses Section -->
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Random Expenses (Bi-Weekly)</h2>
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <input type="number" id="randomExpenseInput" placeholder="Enter random expense amount" class="flex-grow">
+                    <button id="addRandomExpenseBtn" class="btn-primary w-full sm:w-auto">Add Random Expense</button>
+                    <span id="randomExpenseStatus" class="success-message hidden"></span>
+                </div>
+                <p class="mt-4 text-lg text-gray-700">Current Random Expenses: <span id="currentRandomExpenses" class="font-medium">$0.00</span></p>
+                <p id="randomExpenseError" class="error-message hidden"></p>
+            </div>
 
-        <!-- Portfolio Allocation Section -->
-        <div class="card p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Portfolio Allocation</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="cryptoAllocation" class="block text-gray-700 text-sm font-bold mb-2">Crypto (%)</label>
-                    <input type="number" id="cryptoAllocation" placeholder="e.g., 20" min="0" max="100">
-                    <p id="cryptoAllocationError" class="error-message hidden"></p>
-                </div>
-                <div>
-                    <label for="stocksAllocation" class="block text-gray-700 text-sm font-bold mb-2">Stocks (%)</label>
-                    <input type="number" id="stocksAllocation" placeholder="e.g., 50" min="0" max="100">
-                    <p id="stocksAllocationError" class="error-message hidden"></p>
-                </div>
-                <div>
-                    <label for="cashMutualFundsAllocation" class="block text-gray-700 text-sm font-bold mb-2">Cash Mutual Funds (%)</label>
-                    <input type="number" id="cashMutualFundsAllocation" placeholder="e.g., 30" min="0" max="100">
-                    <p id="cashMutualFundsAllocationError" class="error-message hidden"></p>
-                </div>
+            <!-- Net Income Section -->
+            <div class="card p-6 bg-indigo-50">
+                <h2 class="text-2xl font-semibold text-indigo-800 mb-4">Financial Summary</h2>
+                <p class="text-xl font-bold text-indigo-700">Net Income (Bi-Weekly): <span id="netIncome" class="font-extrabold">$0.00</span></p>
             </div>
-            <button id="saveAllocationBtn" class="btn-primary mt-6 w-full">Save Allocation</button>
-            <span id="allocationStatus" class="success-message hidden"></span>
-            <p id="totalAllocationError" class="error-message hidden"></p>
-            <div class="mt-4 text-gray-700">
-                <p>Current Allocation:</p>
-                <ul id="currentAllocationList" class="list-disc list-inside ml-4">
-                    <li>Crypto: <span id="displayCrypto">0%</span></li>
-                    <li>Stocks: <span id="displayStocks">0%</span></li>
-                    <li>Cash Mutual Funds: <span id="displayCashMutualFunds">0%</span></li>
-                </ul>
-            </div>
-        </div>
 
-        <!-- Current Asset Values Section -->
-        <div class="card p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Current Asset Values</h2>
-            <p class="text-sm text-gray-600 mb-4">Enter the current market value of your assets to calculate your net worth.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="currentCryptoValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Crypto Value ($)</label>
-                    <input type="number" id="currentCryptoValueInput" placeholder="e.g., 5000" min="0">
-                    <p id="currentCryptoValueError" class="error-message hidden"></p>
+            <!-- Portfolio Allocation Section -->
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Portfolio Allocation</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="cryptoAllocation" class="block text-gray-700 text-sm font-bold mb-2">Crypto (%)</label>
+                        <input type="number" id="cryptoAllocation" placeholder="e.g., 20" min="0" max="100">
+                        <p id="cryptoAllocationError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="stocksAllocation" class="block text-gray-700 text-sm font-bold mb-2">Stocks (%)</label>
+                        <input type="number" id="stocksAllocation" placeholder="e.g., 50" min="0" max="100">
+                        <p id="stocksAllocationError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="cashMutualFundsAllocation" class="block text-gray-700 text-sm font-bold mb-2">Cash Mutual Funds (%)</label>
+                        <input type="number" id="cashMutualFundsAllocation" placeholder="e.g., 30" min="0" max="100">
+                        <p id="cashMutualFundsAllocationError" class="error-message hidden"></p>
+                    </div>
                 </div>
-                <div>
-                    <label for="currentStocksValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Stocks Value ($)</label>
-                    <input type="number" id="currentStocksValueInput" placeholder="e.g., 15000" min="0">
-                    <p id="currentStocksValueError" class="error-message hidden"></p>
-                </div>
-                <div>
-                    <label for="currentCashMutualFundsValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Cash & Mutual Funds Value ($)</label>
-                    <input type="number" id="currentCashMutualFundsValueInput" placeholder="e.g., 10000" min="0">
-                    <p id="currentCashMutualFundsValueError" class="error-message hidden"></p>
+                <button id="saveAllocationBtn" class="btn-primary mt-6 w-full">Save Allocation</button>
+                <span id="allocationStatus" class="success-message hidden"></span>
+                <p id="totalAllocationError" class="error-message hidden"></p>
+                <div class="mt-4 text-gray-700">
+                    <p>Current Allocation:</p>
+                    <ul id="currentAllocationList" class="list-disc list-inside ml-4">
+                        <li>Crypto: <span id="displayCrypto">0%</span></li>
+                        <li>Stocks: <span id="displayStocks">0%</span></li>
+                        <li>Cash Mutual Funds: <span id="displayCashMutualFunds">0%</span></li>
+                    </ul>
                 </div>
             </div>
-            <button id="saveAssetValuesBtn" class="btn-primary mt-6 w-full">Save Asset Values</button>
-            <span id="assetValuesStatus" class="success-message hidden"></span>
-        </div>
 
-        <!-- Current Net Worth Section -->
-        <div class="card p-6 bg-purple-50">
-            <h2 class="text-2xl font-semibold text-purple-800 mb-4">Current Net Worth</h2>
-            <p class="text-xl font-bold text-purple-700">Total Net Worth: <span id="totalNetWorth" class="font-extrabold">$0.00</span></p>
-        </div>
+            <!-- Current Asset Values Section -->
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Current Asset Values</h2>
+                <p class="text-sm text-gray-600 mb-4">Enter the current market value of your assets to calculate your net worth.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="currentCryptoValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Crypto Value ($)</label>
+                        <input type="number" id="currentCryptoValueInput" placeholder="e.g., 5000" min="0">
+                        <p id="currentCryptoValueError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="currentStocksValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Stocks Value ($)</label>
+                        <input type="number" id="currentStocksValueInput" placeholder="e.g., 15000" min="0">
+                        <p id="currentStocksValueError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="currentCashMutualFundsValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Cash & Mutual Funds Value ($)</label>
+                        <input type="number" id="currentCashMutualFundsValueInput" placeholder="e.g., 10000" min="0">
+                        <p id="currentCashMutualFundsValueError" class="error-message hidden"></p>
+                    </div>
+                </div>
+                <button id="saveAssetValuesBtn" class="btn-primary mt-6 w-full">Save Asset Values</button>
+                <span id="assetValuesStatus" class="success-message hidden"></span>
+            </div>
 
-        <!-- Projected Portfolio Value Section -->
-        <div class="card p-6 bg-blue-50">
-            <h2 class="text-2xl font-semibold text-blue-800 mb-4">Projected Portfolio Value</h2>
-            <p class="text-sm text-gray-600 mb-4">Enter your expected annual growth rates to see future projections.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="annualCryptoGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Crypto Growth (%)</label>
-                    <input type="number" id="annualCryptoGrowthInput" placeholder="e.g., 10" step="0.1">
-                    <p id="annualCryptoGrowthError" class="error-message hidden"></p>
-                </div>
-                <div>
-                    <label for="annualStocksGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Stocks Growth (%)</label>
-                    <input type="number" id="annualStocksGrowthInput" placeholder="e.g., 7" step="0.1">
-                    <p id="annualStocksGrowthError" class="error-message hidden"></p>
-                </div>
-                <div>
-                    <label for="annualCashMutualFundsGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Cash Mutual Funds Growth (%)</label>
-                    <input type="number" id="annualCashMutualFundsGrowthInput" placeholder="e.g., 2" step="0.1">
-                    <p id="annualCashMutualFundsGrowthError" class="error-message hidden"></p>
-                </div>
+            <!-- Current Net Worth Section -->
+            <div class="card p-6 bg-purple-50">
+                <h2 class="text-2xl font-semibold text-purple-800 mb-4">Current Net Worth</h2>
+                <p class="text-xl font-bold text-purple-700">Total Net Worth: <span id="totalNetWorth" class="font-extrabold">$0.00</span></p>
             </div>
-            <button id="saveGrowthRatesBtn" class="btn-primary mt-6 w-full">Save Growth Rates & Project</button>
-            <span id="growthRatesStatus" class="success-message hidden"></span>
 
-            <div class="mt-6 text-blue-700">
-                <h3 class="text-xl font-semibold mb-2">Projected Totals:</h3>
-                <ul class="list-disc list-inside ml-4 space-y-1">
-                    <li>Projected 1 Year: <span id="projected1Year" class="font-bold">$0.00</span></li>
-                    <li>Projected 3 Years: <span id="projected3Years" class="font-bold">$0.00</span></li>
-                    <li>Projected 5 Years: <span id="projected5Years" class="font-bold">$0.00</span></li>
-                </ul>
-                <p class="mt-4 text-sm text-gray-600">Based on your current asset values and specified growth rates.</p>
-            </div>
-        </div>
-
-        <!-- Cash Cushion Section -->
-        <div class="card p-6 bg-green-50">
-            <h2 class="text-2xl font-semibold text-green-800 mb-4">Emergency Fund (Cash Cushion)</h2>
-            <p class="text-lg text-green-700">Target: <span class="font-bold">$20,000.00</span> in 2 years.</p>
-            <p class="text-lg text-green-700">Monthly Target: <span class="font-bold">$833.33</span></p>
-            <p class="text-lg text-green-700">Bi-Weekly Target: <span class="font-bold">$416.67</span></p>
-            <div class="mt-4">
-                <label for="currentCashCushion" class="block text-green-700 text-sm font-bold mb-2">Current Cash Cushion Amount</label>
-                <input type="number" id="currentCashCushion" placeholder="Enter current amount saved">
-                <p id="cashCushionError" class="error-message hidden"></p>
-                <button id="updateCashCushionBtn" class="btn-primary mt-4 w-full">Update Cash Cushion</button>
-                <span id="cashCushionStatus" class="success-message hidden"></span>
-            </div>
-            <div class="mt-6">
-                <p class="text-xl font-bold text-green-700">Saved: <span id="displaySavedCashCushion" class="font-extrabold">$0.00</span></p>
-                <p class="text-xl font-bold text-green-700">Remaining: <span id="displayRemainingCashCushion" class="font-extrabold">$20,000.00</span></p>
-                <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
-                    <div id="cashCushionProgressBar" class="bg-green-500 h-4 rounded-full" style="width: 0%;"></div>
+            <!-- Projected Portfolio Value Section -->
+            <div class="card p-6 bg-blue-50">
+                <h2 class="text-2xl font-semibold text-blue-800 mb-4">Projected Portfolio Value</h2>
+                <p class="text-sm text-gray-600 mb-4">Enter your expected annual growth rates to see future projections.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="annualCryptoGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Crypto Growth (%)</label>
+                        <input type="number" id="annualCryptoGrowthInput" placeholder="e.g., 10" step="0.1">
+                        <p id="annualCryptoGrowthError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="annualStocksGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Stocks Growth (%)</label>
+                        <input type="number" id="annualStocksGrowthInput" placeholder="e.g., 7" step="0.1">
+                        <p id="annualStocksGrowthError" class="error-message hidden"></p>
+                    </div>
+                    <div>
+                        <label for="annualCashMutualFundsGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Cash Mutual Funds Growth (%)</label>
+                        <input type="number" id="annualCashMutualFundsGrowthInput" placeholder="e.g., 2" step="0.1">
+                        <p id="annualCashMutualFundsGrowthError" class="error-message hidden"></p>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-600 mt-1" id="cashCushionProgressText">0% of target achieved.</p>
+                <button id="saveGrowthRatesBtn" class="btn-primary mt-6 w-full">Save Growth Rates & Project</button>
+                <span id="growthRatesStatus" class="success-message hidden"></span>
+
+                <div class="mt-6 text-blue-700">
+                    <h3 class="text-xl font-semibold mb-2">Projected Totals:</h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li>Projected 1 Year: <span id="projected1Year" class="font-bold">$0.00</span></li>
+                        <li>Projected 3 Years: <span id="projected3Years" class="font-bold">$0.00</span></li>
+                        <li>Projected 5 Years: <span id="projected5Years" class="font-bold">$0.00</span></li>
+                    </ul>
+                    <p class="mt-4 text-sm text-gray-600">Based on your current asset values and specified growth rates.</p>
+                </div>
             </div>
-        </div>
+
+            <!-- Cash Cushion Section -->
+            <div class="card p-6 bg-green-50">
+                <h2 class="text-2xl font-semibold text-green-800 mb-4">Emergency Fund (Cash Cushion)</h2>
+                <p class="text-lg text-green-700">Target: <span class="font-bold">$20,000.00</span> in 2 years.</p>
+                <p class="text-lg text-green-700">Monthly Target: <span class="font-bold">$833.33</span></p>
+                <p class="text-lg text-green-700">Bi-Weekly Target: <span class="font-bold">$416.67</span></p>
+                <div class="mt-4">
+                    <label for="currentCashCushion" class="block text-green-700 text-sm font-bold mb-2">Current Cash Cushion Amount</label>
+                    <input type="number" id="currentCashCushion" placeholder="Enter current amount saved">
+                    <p id="cashCushionError" class="error-message hidden"></p>
+                    <button id="updateCashCushionBtn" class="btn-primary mt-4 w-full">Update Cash Cushion</button>
+                    <span id="cashCushionStatus" class="success-message hidden"></span>
+                </div>
+                <div class="mt-6">
+                    <p class="text-xl font-bold text-green-700">Saved: <span id="displaySavedCashCushion" class="font-extrabold">$0.00</span></p>
+                    <p class="text-xl font-bold text-green-700">Remaining: <span id="displayRemainingCashCushion" class="font-extrabold">$20,000.00</span></p>
+                    <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
+                        <div id="cashCushionProgressBar" class="bg-green-500 h-4 rounded-full" style="width: 0%;"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1" id="cashCushionProgressText">0% of target achieved.</p>
+                </div>
+            </div>
+        </div> <!-- End of mainAppContent -->
 
         <!-- Modal for Rename Expense -->
         <div id="renameModal" class="modal">
@@ -357,14 +388,14 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase and user data
         let app;
         let db;
         let auth;
-        let userId;
+        let userId; // This will hold the Firebase UID
         let unsubscribeIncome;
         let unsubscribeExpenses;
         let unsubscribeRandomExpenses;
@@ -373,11 +404,32 @@
         let unsubscribeAssetValues;
         let unsubscribeGrowthRates;
 
-        // Ensure __app_id and __firebase_config are defined in the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // Firebase configuration provided by the user
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbmW_3fHbPHV-9raz8afJidmbgDFOqmVM",
+            authDomain: "mypatriarch-b11c1.firebaseapp.com",
+            projectId: "mypatriarch-b11c1",
+            storageBucket: "mypatriarch-b11c1.firebasestorage.app",
+            messagingSenderId: "605769942473",
+            appId: "1:605769942473:web:3f04cc4392ac8e665b5418",
+            measurementId: "G-Y2G56553TY"
+        };
+
+        // Use __app_id if available, otherwise fall back to projectId from firebaseConfig
+        const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.projectId;
 
         // UI Elements
+        const authSection = document.getElementById('authSection');
+        const mainAppContent = document.getElementById('mainAppContent');
+        const authEmailInput = document.getElementById('authEmail');
+        const authPasswordInput = document.getElementById('authPassword');
+        const signUpBtn = document.getElementById('signUpBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const authStatus = document.getElementById('authStatus');
+        const authEmailError = document.getElementById('authEmailError');
+        const authPasswordError = document.getElementById('authPasswordError');
+        const logoutBtn = document.getElementById('logoutBtn');
+
         const biWeeklyIncomeInput = document.getElementById('biWeeklyIncomeInput');
         const saveIncomeBtn = document.getElementById('saveIncomeBtn');
         const currentBiWeeklyIncomeSpan = document.getElementById('currentBiWeeklyIncome');
@@ -404,6 +456,7 @@
         const netIncomeSpan = document.getElementById('netIncome');
 
         const cryptoAllocationInput = document.getElementById('cryptoAllocation');
+        // FIX: Corrected typo here. Was 'document = document.getElementById'
         const stocksAllocationInput = document.getElementById('stocksAllocation');
         const cashMutualFundsAllocationInput = document.getElementById('cashMutualFundsAllocation');
         const saveAllocationBtn = document.getElementById('saveAllocationBtn');
@@ -534,7 +587,6 @@
          * Displays an error message and highlights the input.
          * @param {HTMLElement} inputElement - The input element to highlight.
          * @param {HTMLElement} errorElement - The span element to display the error message.
-         * @param {string} message - The error message.
          */
         function showInputError(inputElement, errorElement, message) {
             inputElement.classList.add('input-error');
@@ -630,28 +682,122 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                console.log('Firebase services initialized:', { app, db, auth });
 
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                onAuthStateChanged(auth, (user) => {
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
-                        userIdDisplay.textContent = userId;
+                        // Set display name to @Patriarch if not already set
+                        if (user.displayName !== "@Patriarch") {
+                            await updateProfile(user, { displayName: "@Patriarch" });
+                        }
+                        userIdDisplay.textContent = user.displayName || "@Patriarch"; // Display @Patriarch
                         console.log('User signed in with UID:', userId);
+                        authSection.classList.add('hidden');
+                        mainAppContent.classList.remove('hidden');
                         loadAllData();
                     } else {
                         console.log('No user signed in.');
-                        userIdDisplay.textContent = 'Not signed in';
-                        clearAllData();
+                        userId = null; // Clear userId when logged out
+                        userIdDisplay.textContent = 'Not signed in'; // Fallback if not logged in
+                        authSection.classList.remove('hidden');
+                        mainAppContent.classList.add('hidden');
+                        clearAllData(); // Clear data when logged out
                     }
                 });
             } catch (error) {
                 console.error("Error initializing Firebase or authenticating:", error);
                 userIdDisplay.textContent = 'Error loading user';
+                showStatusMessage(authStatus, `Firebase Init Error: ${error.message}`, false);
+            }
+        }
+
+        /**
+         * Handles user sign-up with email and password.
+         */
+        async function handleSignUp() {
+            clearInputError(authEmailInput, authEmailError);
+            clearInputError(authPasswordInput, authPasswordError);
+            authStatus.classList.add('hidden'); // Hide general auth status
+
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value.trim();
+
+            if (!email) { showInputError(authEmailInput, authEmailError, "Email is required."); return; }
+            if (password.length < 6) { showInputError(authPasswordInput, authPasswordError, "Password must be at least 6 characters."); return; }
+
+            showButtonLoading(signUpBtn);
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: "@Patriarch" });
+                authEmailInput.value = '';
+                authPasswordInput.value = '';
+                showStatusMessage(authStatus, 'Sign up successful! Logging in...', true);
+                // onAuthStateChanged will handle showing main content
+            } catch (error) {
+                let errorMessage = "Sign up failed.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use': errorMessage = "Email already in use. Try logging in."; break;
+                    case 'auth/invalid-email': errorMessage = "Invalid email address."; break;
+                    case 'auth/weak-password': errorMessage = "Password is too weak."; break;
+                    default: errorMessage = `Error: ${error.message}`; break;
+                }
+                showStatusMessage(authStatus, errorMessage, false);
+                console.error("Sign up error:", error);
+            } finally {
+                hideButtonLoading(signUpBtn);
+            }
+        }
+
+        /**
+         * Handles user login with email and password.
+         */
+        async function handleLogin() {
+            clearInputError(authEmailInput, authEmailError);
+            clearInputError(authPasswordInput, authPasswordError);
+            authStatus.classList.add('hidden'); // Hide general auth status
+
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value.trim();
+
+            if (!email) { showInputError(authEmailInput, authEmailError, "Email is required."); return; }
+            if (!password) { showInputError(authPasswordInput, authPasswordError, "Password is required."); return; }
+
+            showButtonLoading(loginBtn);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authEmailInput.value = '';
+                authPasswordInput.value = '';
+                showStatusMessage(authStatus, 'Login successful!', true);
+                // onAuthStateChanged will handle showing main content
+            } catch (error) {
+                let errorMessage = "Login failed.";
+                switch (error.code) {
+                    case 'auth/invalid-email': errorMessage = "Invalid email address."; break;
+                    case 'auth/user-disabled': errorMessage = "User account disabled."; break;
+                    case 'auth/user-not-found': errorMessage = "No user found with this email."; break;
+                    case 'auth/wrong-password': errorMessage = "Incorrect password."; break;
+                    default: errorMessage = `Error: ${error.message}`; break;
+                }
+                showStatusMessage(authStatus, errorMessage, false);
+                console.error("Login error:", error);
+            } finally {
+                hideButtonLoading(loginBtn);
+            }
+        }
+
+        /**
+         * Handles user logout.
+         */
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                console.log("User logged out.");
+                // onAuthStateChanged will handle showing auth section and clearing data
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showStatusMessage(userIdDisplay, 'Logout failed!', false); // Display error near user ID
             }
         }
 
@@ -682,6 +828,7 @@
             calculateAndDisplayNetWorth();
             projectPortfolioValues();
 
+            // Unsubscribe from all previous listeners
             if (unsubscribeIncome) unsubscribeIncome();
             if (unsubscribeExpenses) unsubscribeExpenses();
             if (unsubscribeRandomExpenses) unsubscribeRandomExpenses();
@@ -695,6 +842,13 @@
          * Loads all financial data from Firestore for the current user and data type.
          */
         function loadAllData() {
+            // Ensure userId is available before attempting to load data
+            if (!userId) {
+                console.warn("Cannot load data: User not authenticated.");
+                return;
+            }
+
+            // Clear existing data and unsubscribe from old listeners before setting up new ones
             clearAllData();
 
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data`);
@@ -764,8 +918,15 @@
          * Saves the bi-weekly income to Firestore.
          */
         async function saveBiWeeklyIncome() {
-            if (!userId) {
-                showStatusMessage(incomeStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to save income ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(incomeStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(biWeeklyIncomeInput, incomeError);
@@ -799,8 +960,15 @@
          * Adds a new monthly expense to Firestore.
          */
         async function addExpense() {
-            if (!userId) {
-                showStatusMessage(expenseStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to add expense ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(expenseStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(expenseNameInput, expenseNameError);
@@ -874,6 +1042,18 @@
                 "Confirm Deletion",
                 "Are you sure you want to remove this expense?",
                 async () => {
+                    // Log state before operation
+                    console.log("--- Attempting to remove expense ---");
+                    console.log("db:", db);
+                    console.log("appId:", appId);
+                    console.log("userId:", userId);
+                    console.log("currentDataType:", currentDataType);
+
+                    if (!userId || !db) {
+                        showStatusMessage(expenseStatus, 'App not ready. Please log in and wait.', false);
+                        hideConfirmationModal(); // Hide modal if not ready
+                        return;
+                    }
                     try {
                         const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
                         await deleteDoc(expenseDocRef);
@@ -894,9 +1074,16 @@
          * @param {string} newName - The new name for the expense.
          */
         async function renameExpense(expenseId, newName) {
-            if (!userId) {
-                showStatusMessage(renameStatus, 'App not ready. Please wait.', false);
-                throw new Error('User not authenticated for rename.'); // Re-throw to be caught by handleRenameConfirm
+            // Log state before operation
+            console.log("--- Attempting to rename expense ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(renameStatus, 'App not ready. Please log in and wait.', false);
+                throw new Error('User not authenticated or DB not initialized for rename.'); // Re-throw to be caught by handleRenameConfirm
             }
             try {
                 const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
@@ -912,8 +1099,15 @@
          * Adds a random expense amount to Firestore.
          */
         async function addRandomExpense() {
-            if (!userId) {
-                showStatusMessage(randomExpenseStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to add random expense ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(randomExpenseStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(randomExpenseInput, randomExpenseError);
@@ -959,8 +1153,15 @@
          * Saves the portfolio allocation percentages to Firestore.
          */
         async function savePortfolioAllocation() {
-            if (!userId) {
-                showStatusMessage(allocationStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to save portfolio allocation ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(allocationStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(cryptoAllocationInput, cryptoAllocationError);
@@ -1014,8 +1215,15 @@
          * Saves the current asset values to Firestore.
          */
         async function saveAssetValues() {
-            if (!userId) {
-                showStatusMessage(assetValuesStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to save asset values ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(assetValuesStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(currentCryptoValueInput, currentCryptoValueError);
@@ -1070,8 +1278,15 @@
          * Saves the annual growth rates to Firestore.
          */
         async function saveGrowthRates() {
-            if (!userId) {
-                showStatusMessage(growthRatesStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to save growth rates ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(growthRatesStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(annualCryptoGrowthInput, annualCryptoGrowthError);
@@ -1147,8 +1362,15 @@
          * Updates the current cash cushion amount in Firestore.
          */
         async function updateCashCushion() {
-            if (!userId) {
-                showStatusMessage(cashCushionStatus, 'App not ready. Please wait.', false);
+            // Log state before operation
+            console.log("--- Attempting to update cash cushion ---");
+            console.log("db:", db);
+            console.log("appId:", appId);
+            console.log("userId:", userId);
+            console.log("currentDataType:", currentDataType);
+
+            if (!userId || !db) {
+                showStatusMessage(cashCushionStatus, 'App not ready. Please log in and wait.', false);
                 return;
             }
             clearInputError(currentCashCushionInput, cashCushionError);
@@ -1184,7 +1406,12 @@
             cashCushionProgressText.textContent = `${Math.min(100, progressPercentage).toFixed(0)}% of target achieved.`;
         }
 
-        // Event Listeners
+        // Event Listeners for Authentication
+        signUpBtn.addEventListener('click', handleSignUp);
+        loginBtn.addEventListener('click', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Event Listeners for Main App Functionality
         saveIncomeBtn.addEventListener('click', saveBiWeeklyIncome);
         addExpenseBtn.addEventListener('click', addExpense);
         addRandomExpenseBtn.addEventListener('click', addRandomExpense);
