@@ -3,1161 +3,1199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyPatriarch</title>
+    <title>Asset Management App</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light blue-gray background */
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            min-height: 100vh; /* Ensure body takes full height */
-            display: flex; /* Use flexbox for body to center its content */
-            justify-content: center;
-            align-items: flex-start; /* Align at the top, allowing content to flow down */
-            padding-top: 50px; /* Add some padding from the top */
+            background-color: #f3f4f6;
+            color: #374151;
         }
-        .content-card-style {
-            background-color: #ffffff;
-            padding: 3rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
+        .container {
             max-width: 960px;
-            width: 90%;
-            position: relative;
-            min-height: 500px;
-            box-sizing: border-box;
-            /* margin-left: auto; */ /* Removed as body flex handles centering */
-            /* margin-right: auto; */ /* Removed as body flex handles centering */
-            display: none; /* Hidden by default, controlled by JS */
+            margin: 0 auto;
+            padding: 1.5rem;
         }
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
-            display: flex; /* Use flex to center modal content */
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #ffffff;
-            /* margin: auto; Removed, flex handles centering */
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
-            width: 90%;
-            position: relative;
-            max-height: 90vh; /* Limit height and allow scrolling */
-            overflow-y: auto; /* Enable vertical scrolling if content overflows */
-        }
-        .close-button {
-            color: #aaa;
-            /* float: right; Removed, position: absolute is better */
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            top: 15px;
-            right: 25px;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #333;
-            text-decoration: none;
-        }
-        input[type="text"],
-        input[type="password"],
-        input[type="email"],
-        input[type="number"] {
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            border: 1px solid #cbd5e0; /* Light gray border */
+        input[type="number"], input[type="text"] {
+            padding: 0.75rem 1rem;
             border-radius: 0.5rem;
-            box-sizing: border-box;
-            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
         button {
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         button:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
         .btn-primary {
-            background-color: #4f46e5; /* Indigo 600 */
+            background-color: #6366f1;
             color: white;
-            border: none;
         }
         .btn-primary:hover {
-            background-color: #4338ca; /* Indigo 700 */
+            background-color: #4f46e5;
         }
         .btn-secondary {
-            background-color: #e2e8f0; /* Gray 200 */
-            color: #475569; /* Slate 700 */
-            border: none;
+            background-color: #e5e7eb;
+            color: #374151;
         }
         .btn-secondary:hover {
-            background-color: #cbd5e0; /* Gray 300 */
+            background-color: #d1d5db;
         }
-        .message-box {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            text-align: center;
-            min-width: 250px;
-            max-width: 90%;
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
         }
-        .message-box button {
-            margin-top: 15px;
+        .btn-danger:hover {
+            background-color: #dc2626;
         }
-        .loading-spinner {
-            display: none;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #4f46e5;
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6366f1;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .hidden {
-            display: none !important; /* Adding !important to ensure it overrides other display properties */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
         }
-        .profile-card {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 1.5rem;
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
             border-radius: 0.75rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .profile-card:hover {
-            background-color: #eff6ff;
-            border-color: #bfdbfe;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+        .success-message {
+            color: #10b981; /* green-500 */
+            font-size: 0.875rem; /* text-sm */
+            margin-left: 0.5rem; /* ml-2 */
         }
     </style>
 </head>
-<body>
-    <div id="initial-content-wrapper" class="content-card-style">
-        <h1 class="text-4xl font-bold text-gray-800 mb-6">Welcome to MyPatriarch</h1>
-        <p class="text-lg text-gray-600 mb-8">Click here to Login</p>
-        <button id="show-login-btn-initial" class="btn-primary px-8 py-3 text-xl">Login</button>
-    </div>
+<body class="bg-gray-100 p-4">
+    <div class="container space-y-6">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Asset Management Dashboard</h1>
 
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="login-modal-close-btn">&times;</span>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Family Login</h2>
-            <input type="email" id="login-email" placeholder="Family Email" required>
-            <input type="password" id="login-password" placeholder="Family Password" required>
-            <button id="login-submit-btn" class="btn-primary w-full mb-2">Login</button>
-            <button id="login-back-btn" class="btn-secondary w-full">Go Back</button>
-            <p id="login-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
-            <div id="login-loading-spinner" class="loading-spinner"></div>
+        <!-- User ID Display -->
+        <div class="card p-4 flex items-center justify-between">
+            <p class="text-lg font-semibold text-gray-700">Your User ID:</p>
+            <span id="userIdDisplay" class="text-sm font-mono bg-gray-100 p-2 rounded-md text-gray-600">Loading...</span>
         </div>
-    </div>
 
-    <div id="profile-selection-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="profile-selection-close-btn">&times;</span> <h2 class="text-2xl font-semibold text-gray-800 mb-6">Select Your Profile</h2>
-            <div id="profiles-list" class="space-y-4 mb-6">
-                <p id="no-profiles-message" class="text-gray-500">No profiles found. Create one below!</p>
-            </div>
-            <button id="create-profile-btn" class="btn-primary w-full">Create New Profile</button>
-            <div id="profile-selection-loading-spinner" class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <div id="create-profile-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="create-profile-close-btn">&times;</span>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Create New Profile</h2>
-            <input type="text" id="new-profile-name" placeholder="Profile Name (e.g., John, Jane)" required>
-            <input type="password" id="new-profile-pin" placeholder="Set a 4-digit PIN" maxlength="4" required>
-            <input type="password" id="confirm-new-profile-pin" placeholder="Confirm PIN" maxlength="4" required>
-            <button id="submit-create-profile-btn" class="btn-primary w-full mb-2">Create Profile</button>
-            <button id="back-to-profile-selection-btn" class="btn-secondary w-full">Go Back</button>
-            <p id="create-profile-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
-            <div id="create-profile-loading-spinner" class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <div id="enter-pin-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="enter-pin-close-btn">&times;</span>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Enter PIN for <span id="pin-profile-name"></span></h2>
-            <input type="password" id="pin-input" placeholder="Enter your PIN" maxlength="4" required>
-            <button id="submit-pin-btn" class="btn-primary w-full mb-2">Access Profile</button>
-            <button id="back-from-pin-btn" class="btn-secondary w-full">Go Back</button>
-            <p id="pin-error-message" class="text-red-500 text-sm mt-2 hidden"></p>
-            <div id="pin-loading-spinner" class="loading-spinner"></div>
-        </div>
-    </div>
-
-
-    <div id="main-dashboard" class="content-card-style">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">MyPatriarch Dashboard (<span id="current-profile-name-display"></span>)</h1>
-            <div class="flex items-center">
-                <p id="user-display-id" class="text-gray-700 mr-4"></p>
-                <button id="switch-profile-btn" class="btn-secondary mr-2">Switch Profile</button>
-                <button id="logout-btn" class="btn-secondary">Logout</button>
+        <!-- Data Type Selector -->
+        <div class="card p-6 flex items-center justify-between">
+            <h2 class="text-2xl font-semibold text-gray-800">Data Type</h2>
+            <div class="flex items-center space-x-4">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio text-indigo-600" name="dataType" value="real" checked>
+                    <span class="ml-2 text-gray-700">Real Data</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio text-indigo-600" name="dataType" value="simulation">
+                    <span class="ml-2 text-gray-700">Simulation Data</span>
+                </label>
             </div>
         </div>
 
-        <div class="bg-gray-50 p-6 rounded-lg mb-8 text-left">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Inputs</h3>
+        <!-- Income Section -->
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Bi-Weekly Income</h2>
+            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="number" id="biWeeklyIncomeInput" placeholder="Enter bi-weekly income" class="flex-grow">
+                <button id="saveIncomeBtn" class="btn-primary w-full sm:w-auto">Save Income</button>
+                <span id="incomeStatus" class="success-message hidden"></span>
+            </div>
+            <p class="mt-4 text-lg text-gray-700">Current Bi-Weekly Income: <span id="currentBiWeeklyIncome" class="font-medium">$0.00</span></p>
+            <p id="incomeError" class="error-message hidden"></p>
+        </div>
+
+        <!-- Expenses Section -->
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Monthly Expenses</h2>
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <input type="text" id="expenseNameInput" placeholder="Expense Name" class="flex-grow">
+                    <input type="number" id="expenseAmountInput" placeholder="Amount" class="flex-grow">
+                    <button id="addExpenseBtn" class="btn-primary w-full sm:w-auto">Add Expense</button>
+                    <span id="expenseStatus" class="success-message hidden"></span>
+                </div>
+                <p id="expenseNameError" class="error-message hidden"></p>
+                <p id="expenseAmountError" class="error-message hidden"></p>
+                <div id="expensesList" class="space-y-2">
+                    <!-- Expenses will be listed here -->
+                    <p class="text-gray-500 text-center" id="noExpensesMessage">No expenses added yet.</p>
+                </div>
+            </div>
+            <p class="mt-6 text-lg text-gray-700">Total Monthly Expenses: <span id="totalMonthlyExpenses" class="font-medium">$0.00</span></p>
+            <p class="text-lg text-gray-700">Bi-Weekly Allocation for Monthly Expenses: <span id="biWeeklyExpenseAllocation" class="font-medium">$0.00</span></p>
+        </div>
+
+        <!-- Random Expenses Section -->
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Random Expenses (Bi-Weekly)</h2>
+            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="number" id="randomExpenseInput" placeholder="Enter random expense amount" class="flex-grow">
+                <button id="addRandomExpenseBtn" class="btn-primary w-full sm:w-auto">Add Random Expense</button>
+                <span id="randomExpenseStatus" class="success-message hidden"></span>
+            </div>
+            <p class="mt-4 text-lg text-gray-700">Current Random Expenses: <span id="currentRandomExpenses" class="font-medium">$0.00</span></p>
+            <p id="randomExpenseError" class="error-message hidden"></p>
+        </div>
+
+        <!-- Net Income Section -->
+        <div class="card p-6 bg-indigo-50">
+            <h2 class="text-2xl font-semibold text-indigo-800 mb-4">Financial Summary</h2>
+            <p class="text-xl font-bold text-indigo-700">Net Income (Bi-Weekly): <span id="netIncome" class="font-extrabold">$0.00</span></p>
+        </div>
+
+        <!-- Portfolio Allocation Section -->
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Portfolio Allocation</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="input-income-past-two-weeks" class="block text-sm font-medium text-gray-700">Income (Past 2 Weeks)</label>
-                    <input type="number" id="input-income-past-two-weeks" placeholder="e.g., 1000" class="mt-1">
+                    <label for="cryptoAllocation" class="block text-gray-700 text-sm font-bold mb-2">Crypto (%)</label>
+                    <input type="number" id="cryptoAllocation" placeholder="e.g., 20" min="0" max="100">
+                    <p id="cryptoAllocationError" class="error-message hidden"></p>
                 </div>
                 <div>
-                    <label for="input-car-insurance" class="block text-sm font-medium text-gray-700">Car Insurance</label>
-                    <input type="number" id="input-car-insurance" placeholder="e.g., 150" class="mt-1">
+                    <label for="stocksAllocation" class="block text-gray-700 text-sm font-bold mb-2">Stocks (%)</label>
+                    <input type="number" id="stocksAllocation" placeholder="e.g., 50" min="0" max="100">
+                    <p id="stocksAllocationError" class="error-message hidden"></p>
                 </div>
                 <div>
-                    <label for="input-gas-money" class="block text-sm font-medium text-gray-700">Gas Money</label>
-                    <input type="number" id="input-gas-money" placeholder="e.g., 80" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-credit-card-debt" class="block text-sm font-medium text-gray-700">Current Credit Card Debt</label>
-                    <input type="number" id="input-credit-card-debt" placeholder="e.g., 2000" class="mt-1">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Oil Change Due?</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="radio" id="oil-change-yes" name="oil-change-due" value="yes" class="form-radio text-indigo-600">
-                        <label for="oil-change-yes" class="text-gray-700">Yes</label>
-                        <input type="radio" id="oil-change-no" name="oil-change-due" value="no" class="form-radio text-indigo-600" checked>
-                        <label for="oil-change-no" class="text-gray-700">No</label>
-                    </div>
-                    <div id="oil-change-input-container" class="mt-2 hidden">
-                        <label for="input-oil-change-money" class="block text-sm font-medium text-gray-700">Oil Change Money</label>
-                        <input type="number" id="input-oil-change-money" placeholder="e.g., 75" class="mt-1">
-                    </div>
-                </div>
-                <div>
-                    <label for="input-parking" class="block text-sm font-medium text-gray-700">Parking Costs</label>
-                    <input type="number" id="input-parking" placeholder="e.g., 20" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-car-wash" class="block text-sm font-medium text-gray-700">Car Wash Money</label>
-                    <input type="number" id="input-car-wash" placeholder="e.g., 15" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-fun-money" class="block text-sm font-medium text-gray-700">Fun Money</label>
-                    <input type="number" id="input-fun-money" placeholder="e.g., 100" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-zim-support" class="block text-sm font-medium text-gray-700">Zim Support</label>
-                    <input type="number" id="input-zim-support" placeholder="e.g., 50" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-offering" class="block text-sm font-medium text-gray-700">Offering</label>
-                    <input type="number" id="input-offering" placeholder="e.g., 30" class="mt-1">
-                </div>
-                <div>
-                    <label for="input-other-costs" class="block text-sm font-medium text-gray-700">Other Costs (e.g., Self Care)</label>
-                    <input type="number" id="input-other-costs" placeholder="e.g., 40" class="mt-1">
+                    <label for="cashMutualFundsAllocation" class="block text-gray-700 text-sm font-bold mb-2">Cash Mutual Funds (%)</label>
+                    <input type="number" id="cashMutualFundsAllocation" placeholder="e.g., 30" min="0" max="100">
+                    <p id="cashMutualFundsAllocationError" class="error-message hidden"></p>
                 </div>
             </div>
-            <button id="save-financial-data-btn" class="btn-primary mt-6 w-full">Save Financial Data</button>
-            <p id="financial-save-message" class="text-green-600 text-sm mt-2 hidden"></p>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-md text-left mb-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Financial Summary</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                <p><strong>Income (Past 2 Weeks):</strong> $<span id="display-income-past-two-weeks">0.00</span></p>
-                <p><strong>Car Insurance:</strong> $<span id="display-car-insurance">0.00</span></p>
-                <p><strong>Gas Money:</strong> $<span id="display-gas-money">0.00</span></p>
-                <p><strong>Current Credit Card Debt:</strong> $<span id="display-credit-card-debt">0.00</span></p>
-                <p><strong>Oil Change Money:</strong> $<span id="display-oil-change-money">0.00</span></p>
-                <p><strong>Parking Costs:</strong> $<span id="display-parking">0.00</span></p>
-                <p><strong>Car Wash Money:</strong> $<span id="display-car-wash">0.00</span></p>
-                <p><strong>Fun Money:</strong> $<span id="display-fun-money">0.00</span></p>
-                <p><strong>Zim Support:</strong> $<span id="display-zim-support">0.00</span></p>
-                <p><strong>Offering:</strong> $<span id="display-offering">0.00</span></p>
-                <p><strong>Other Costs:</strong> $<span id="display-other-costs">0.00</span></p>
-                <p><strong>Last Updated:</strong> <span id="display-last-updated">N/A</span></p>
-            </div>
-            <div class="mt-6 pt-4 border-t border-gray-200">
-                <p class="text-xl font-bold text-gray-800">Disposable Income: $<span id="display-disposable-income">0.00</span></p>
+            <button id="saveAllocationBtn" class="btn-primary mt-6 w-full">Save Allocation</button>
+            <span id="allocationStatus" class="success-message hidden"></span>
+            <p id="totalAllocationError" class="error-message hidden"></p>
+            <div class="mt-4 text-gray-700">
+                <p>Current Allocation:</p>
+                <ul id="currentAllocationList" class="list-disc list-inside ml-4">
+                    <li>Crypto: <span id="displayCrypto">0%</span></li>
+                    <li>Stocks: <span id="displayStocks">0%</span></li>
+                    <li>Cash Mutual Funds: <span id="displayCashMutualFunds">0%</span></li>
+                </ul>
             </div>
         </div>
 
-        <div class="bg-gray-50 p-6 rounded-lg text-left">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Allocation Research</h3>
-            <p class="text-gray-700 mb-4">Get personalized allocation advice based on your disposable income.</p>
-            <button id="research-allocation-btn" class="btn-primary w-full">Get Allocation Advice</button>
-            <div id="research-loading-spinner" class="loading-spinner"></div>
-            <div id="allocation-result" class="mt-4 p-4 bg-white rounded-lg border border-gray-200 hidden">
-                <h4 class="font-semibold text-gray-800 mb-2">Allocation Advice:</h4>
-                <p id="allocation-text" class="text-gray-700 whitespace-pre-wrap"></p>
+        <!-- Current Asset Values Section -->
+        <div class="card p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Current Asset Values</h2>
+            <p class="text-sm text-gray-600 mb-4">Enter the current market value of your assets to calculate your net worth.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="currentCryptoValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Crypto Value ($)</label>
+                    <input type="number" id="currentCryptoValueInput" placeholder="e.g., 5000" min="0">
+                    <p id="currentCryptoValueError" class="error-message hidden"></p>
+                </div>
+                <div>
+                    <label for="currentStocksValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Stocks Value ($)</label>
+                    <input type="number" id="currentStocksValueInput" placeholder="e.g., 15000" min="0">
+                    <p id="currentStocksValueError" class="error-message hidden"></p>
+                </div>
+                <div>
+                    <label for="currentCashMutualFundsValueInput" class="block text-gray-700 text-sm font-bold mb-2">Current Cash & Mutual Funds Value ($)</label>
+                    <input type="number" id="currentCashMutualFundsValueInput" placeholder="e.g., 10000" min="0">
+                    <p id="currentCashMutualFundsValueError" class="error-message hidden"></p>
+                </div>
+            </div>
+            <button id="saveAssetValuesBtn" class="btn-primary mt-6 w-full">Save Asset Values</button>
+            <span id="assetValuesStatus" class="success-message hidden"></span>
+        </div>
+
+        <!-- Current Net Worth Section -->
+        <div class="card p-6 bg-purple-50">
+            <h2 class="text-2xl font-semibold text-purple-800 mb-4">Current Net Worth</h2>
+            <p class="text-xl font-bold text-purple-700">Total Net Worth: <span id="totalNetWorth" class="font-extrabold">$0.00</span></p>
+        </div>
+
+        <!-- Projected Portfolio Value Section -->
+        <div class="card p-6 bg-blue-50">
+            <h2 class="text-2xl font-semibold text-blue-800 mb-4">Projected Portfolio Value</h2>
+            <p class="text-sm text-gray-600 mb-4">Enter your expected annual growth rates to see future projections.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="annualCryptoGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Crypto Growth (%)</label>
+                    <input type="number" id="annualCryptoGrowthInput" placeholder="e.g., 10" step="0.1">
+                    <p id="annualCryptoGrowthError" class="error-message hidden"></p>
+                </div>
+                <div>
+                    <label for="annualStocksGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Stocks Growth (%)</label>
+                    <input type="number" id="annualStocksGrowthInput" placeholder="e.g., 7" step="0.1">
+                    <p id="annualStocksGrowthError" class="error-message hidden"></p>
+                </div>
+                <div>
+                    <label for="annualCashMutualFundsGrowthInput" class="block text-blue-700 text-sm font-bold mb-2">Annual Cash Mutual Funds Growth (%)</label>
+                    <input type="number" id="annualCashMutualFundsGrowthInput" placeholder="e.g., 2" step="0.1">
+                    <p id="annualCashMutualFundsGrowthError" class="error-message hidden"></p>
+                </div>
+            </div>
+            <button id="saveGrowthRatesBtn" class="btn-primary mt-6 w-full">Save Growth Rates & Project</button>
+            <span id="growthRatesStatus" class="success-message hidden"></span>
+
+            <div class="mt-6 text-blue-700">
+                <h3 class="text-xl font-semibold mb-2">Projected Totals:</h3>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>Projected 1 Year: <span id="projected1Year" class="font-bold">$0.00</span></li>
+                    <li>Projected 3 Years: <span id="projected3Years" class="font-bold">$0.00</span></li>
+                    <li>Projected 5 Years: <span id="projected5Years" class="font-bold">$0.00</span></li>
+                </ul>
+                <p class="mt-4 text-sm text-gray-600">Based on your current asset values and specified growth rates.</p>
             </div>
         </div>
+
+        <!-- Cash Cushion Section -->
+        <div class="card p-6 bg-green-50">
+            <h2 class="text-2xl font-semibold text-green-800 mb-4">Emergency Fund (Cash Cushion)</h2>
+            <p class="text-lg text-green-700">Target: <span class="font-bold">$20,000.00</span> in 2 years.</p>
+            <p class="text-lg text-green-700">Monthly Target: <span class="font-bold">$833.33</span></p>
+            <p class="text-lg text-green-700">Bi-Weekly Target: <span class="font-bold">$416.67</span></p>
+            <div class="mt-4">
+                <label for="currentCashCushion" class="block text-green-700 text-sm font-bold mb-2">Current Cash Cushion Amount</label>
+                <input type="number" id="currentCashCushion" placeholder="Enter current amount saved">
+                <p id="cashCushionError" class="error-message hidden"></p>
+                <button id="updateCashCushionBtn" class="btn-primary mt-4 w-full">Update Cash Cushion</button>
+                <span id="cashCushionStatus" class="success-message hidden"></span>
+            </div>
+            <div class="mt-6">
+                <p class="text-xl font-bold text-green-700">Saved: <span id="displaySavedCashCushion" class="font-extrabold">$0.00</span></p>
+                <p class="text-xl font-bold text-green-700">Remaining: <span id="displayRemainingCashCushion" class="font-extrabold">$20,000.00</span></p>
+                <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
+                    <div id="cashCushionProgressBar" class="bg-green-500 h-4 rounded-full" style="width: 0%;"></div>
+                </div>
+                <p class="text-sm text-gray-600 mt-1" id="cashCushionProgressText">0% of target achieved.</p>
+            </div>
+        </div>
+
+        <!-- Modal for Rename Expense -->
+        <div id="renameModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeRenameModal">&times;</span>
+                <h3 class="text-xl font-semibold mb-4">Rename Expense</h3>
+                <input type="text" id="newExpenseNameInput" placeholder="New Expense Name" class="mb-4">
+                <p id="renameExpenseError" class="error-message hidden"></p>
+                <button id="confirmRenameBtn" class="btn-primary w-full">Rename</button>
+                <span id="renameStatus" class="success-message hidden"></span>
+            </div>
+        </div>
+
+        <!-- Modal for Confirmation -->
+        <div id="confirmationModal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-semibold mb-4" id="confirmationModalTitle">Confirm Action</h3>
+                <p class="mb-6" id="confirmationModalMessage">Are you sure you want to proceed?</p>
+                <div class="flex justify-end space-x-4">
+                    <button id="cancelConfirmBtn" class="btn-secondary">Cancel</button>
+                    <button id="confirmActionBtn" class="btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="firebase-config-message" class="message-box">
-        <p class="text-lg text-gray-700">Firebase configuration is missing. Please ensure `__firebase_config` is defined.</p>
-        <button onclick="document.getElementById('firebase-config-message').style.display='none'" class="btn-primary">OK</button>
-    </div>
-
-    <div id="general-message-box" class="message-box">
-        <p id="general-message-text" class="text-lg text-gray-700"></p>
-        <button onclick="document.getElementById('general-message-box').style.display='none'" class="btn-primary">OK</button>
-    </div>
-
+    <!-- Firebase SDKs -->
     <script type="module">
-        // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables for Firebase config and app ID
-        // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Removed as no longer used
-        // HARDCODED FIREBASE CONFIGURATION AS REQUESTED
-        const firebaseConfig = {
-            apiKey: "AIzaSyCbmW_3fHbPHV-9raz8afJidmbgDFOqmVM",
-            authDomain: "mypatriarch-b11c1.firebaseapp.com",
-            projectId: "mypatriarch-b11c1",
-            storageBucket: "mypatriarch-b11c1.firebasestorage.app",
-            messagingSenderId: "605769942473",
-            appId: "1:605769942473:web:3f04cc4392ac8e665b5418",
-            measurementId: "G-Y2G56553TY"
-        };
-        // End of HARDCODED FIREBASE CONFIGURATION
-
-        // Firebase App, Auth, and Firestore instances
+        // Global variables for Firebase and user data
         let app;
-        let auth;
         let db;
-        let currentAuthUserId = null; // This is the UID from Firebase Auth (shared for the family)
-        let currentProfileId = null; // This is the ID of the selected in-app profile
-        let currentProfileName = null;
-        let isAuthReady = false; // Flag to indicate if auth state has been checked
+        let auth;
+        let userId;
+        let unsubscribeIncome;
+        let unsubscribeExpenses;
+        let unsubscribeRandomExpenses;
+        let unsubscribeAllocation;
+        let unsubscribeCashCushion;
+        let unsubscribeAssetValues;
+        let unsubscribeGrowthRates;
 
-        // Constants for patriarch credentials
-        const PATRIARCH_EMAIL = "takwirira@proton.me";
-        const PATRIARCH_PASSWORD = "P-1.00.25";
-        const PATRIARCH_FAMILY_ID = "patriarch";
+        // Ensure __app_id and __firebase_config are defined in the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
-        // Utility function to hash PINs (using Web Crypto API for security)
-        async function hashPIN(pin) {
-            const textEncoder = new TextEncoder();
-            const data = textEncoder.encode(pin);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hexHash;
+        // UI Elements
+        const biWeeklyIncomeInput = document.getElementById('biWeeklyIncomeInput');
+        const saveIncomeBtn = document.getElementById('saveIncomeBtn');
+        const currentBiWeeklyIncomeSpan = document.getElementById('currentBiWeeklyIncome');
+        const incomeStatus = document.getElementById('incomeStatus');
+        const incomeError = document.getElementById('incomeError');
+
+        const expenseNameInput = document.getElementById('expenseNameInput');
+        const expenseAmountInput = document.getElementById('expenseAmountInput');
+        const addExpenseBtn = document.getElementById('addExpenseBtn');
+        const expensesList = document.getElementById('expensesList');
+        const noExpensesMessage = document.getElementById('noExpensesMessage');
+        const totalMonthlyExpensesSpan = document.getElementById('totalMonthlyExpenses');
+        const biWeeklyExpenseAllocationSpan = document.getElementById('biWeeklyExpenseAllocation');
+        const expenseStatus = document.getElementById('expenseStatus');
+        const expenseNameError = document.getElementById('expenseNameError');
+        const expenseAmountError = document.getElementById('expenseAmountError');
+
+        const randomExpenseInput = document.getElementById('randomExpenseInput');
+        const addRandomExpenseBtn = document.getElementById('addRandomExpenseBtn');
+        const currentRandomExpensesSpan = document.getElementById('currentRandomExpenses');
+        const randomExpenseStatus = document.getElementById('randomExpenseStatus');
+        const randomExpenseError = document.getElementById('randomExpenseError');
+
+        const netIncomeSpan = document.getElementById('netIncome');
+
+        const cryptoAllocationInput = document.getElementById('cryptoAllocation');
+        const stocksAllocationInput = document.getElementById('stocksAllocation');
+        const cashMutualFundsAllocationInput = document.getElementById('cashMutualFundsAllocation');
+        const saveAllocationBtn = document.getElementById('saveAllocationBtn');
+        const displayCryptoSpan = document.getElementById('displayCrypto');
+        const displayStocksSpan = document.getElementById('displayStocks');
+        const displayCashMutualFundsSpan = document.getElementById('displayCashMutualFunds');
+        const allocationStatus = document.getElementById('allocationStatus');
+        const cryptoAllocationError = document.getElementById('cryptoAllocationError');
+        const stocksAllocationError = document.getElementById('stocksAllocationError');
+        const cashMutualFundsAllocationError = document.getElementById('cashMutualFundsAllocationError');
+        const totalAllocationError = document.getElementById('totalAllocationError');
+
+
+        const currentCryptoValueInput = document.getElementById('currentCryptoValueInput');
+        const currentStocksValueInput = document.getElementById('currentStocksValueInput');
+        const currentCashMutualFundsValueInput = document.getElementById('currentCashMutualFundsValueInput');
+        const saveAssetValuesBtn = document.getElementById('saveAssetValuesBtn');
+        const assetValuesStatus = document.getElementById('assetValuesStatus');
+        const currentCryptoValueError = document.getElementById('currentCryptoValueError');
+        const currentStocksValueError = document.getElementById('currentStocksValueError');
+        const currentCashMutualFundsValueError = document.getElementById('currentCashMutualFundsValueError');
+
+        const totalNetWorthSpan = document.getElementById('totalNetWorth');
+
+        const annualCryptoGrowthInput = document.getElementById('annualCryptoGrowthInput');
+        const annualStocksGrowthInput = document.getElementById('annualStocksGrowthInput');
+        const annualCashMutualFundsGrowthInput = document.getElementById('annualCashMutualFundsGrowthInput');
+        const saveGrowthRatesBtn = document.getElementById('saveGrowthRatesBtn');
+        const projected1YearSpan = document.getElementById('projected1Year');
+        const projected3YearsSpan = document.getElementById('projected3Years');
+        const projected5YearsSpan = document.getElementById('projected5Years');
+        const growthRatesStatus = document.getElementById('growthRatesStatus');
+        const annualCryptoGrowthError = document.getElementById('annualCryptoGrowthError');
+        const annualStocksGrowthError = document.getElementById('annualStocksGrowthError');
+        const annualCashMutualFundsGrowthError = document.getElementById('annualCashMutualFundsGrowthError');
+
+        const currentCashCushionInput = document.getElementById('currentCashCushion');
+        const updateCashCushionBtn = document.getElementById('updateCashCushionBtn');
+        const displaySavedCashCushionSpan = document.getElementById('displaySavedCashCushion');
+        const displayRemainingCashCushionSpan = document.getElementById('displayRemainingCashCushion');
+        const cashCushionProgressBar = document.getElementById('cashCushionProgressBar');
+        const cashCushionProgressText = document.getElementById('cashCushionProgressText');
+        const cashCushionStatus = document.getElementById('cashCushionStatus');
+        const cashCushionError = document.getElementById('cashCushionError');
+
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const dataTypeRadios = document.querySelectorAll('input[name="dataType"]');
+
+        // Modals
+        const renameModal = document.getElementById('renameModal');
+        const closeRenameModalBtn = document.getElementById('closeRenameModal');
+        const newExpenseNameInput = document.getElementById('newExpenseNameInput');
+        const confirmRenameBtn = document.getElementById('confirmRenameBtn');
+        const renameStatus = document.getElementById('renameStatus');
+        const renameExpenseError = document.getElementById('renameExpenseError');
+        let currentExpenseToRenameId = null;
+
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
+        const confirmationModalMessage = document.getElementById('confirmationModalMessage');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmActionBtn = document.getElementById('confirmActionBtn');
+        let confirmationCallback = null;
+
+        // Data variables
+        let biWeeklyIncome = 0;
+        let monthlyExpenses = []; // Array of { id, name, amount }
+        let randomExpenses = 0;
+        let portfolioAllocation = { crypto: 0, stocks: 0, cashMutualFunds: 0 };
+        const CASH_CUSHION_TARGET = 20000;
+        const CASH_CUSHION_MONTHLY_TARGET = CASH_CUSHION_TARGET / 24; // 2 years = 24 months
+        const CASH_CUSHION_BIWEEKLY_TARGET = CASH_CUSHION_MONTHLY_TARGET / 2;
+        let currentCashCushion = 0;
+        let currentDataType = 'real'; // Default data type
+
+        let currentCryptoValue = 0;
+        let currentStocksValue = 0;
+        let currentCashMutualFundsValue = 0;
+
+        let annualCryptoGrowthRate = 0;
+        let annualStocksGrowthRate = 0;
+        let annualCashMutualFundsGrowthRate = 0;
+
+        /**
+         * Shows a loading spinner next to the given button.
+         * @param {HTMLElement} button - The button element to show the spinner next to.
+         */
+        function showButtonLoading(button) {
+            button.disabled = true;
+            let spinner = button.querySelector('.loader');
+            if (!spinner) {
+                spinner = document.createElement('div');
+                spinner.className = 'loader ml-2 inline-block align-middle';
+                button.appendChild(spinner);
+            }
+            spinner.style.display = 'inline-block';
         }
 
-        // --- UI Element References ---
-        const initialContentWrapper = document.getElementById('initial-content-wrapper');
-        const showLoginBtnInitial = document.getElementById('show-login-btn-initial');
-
-        const loginModal = document.getElementById('login-modal');
-        const loginEmailInput = document.getElementById('login-email');
-        const loginPasswordInput = document.getElementById('login-password');
-        const loginSubmitBtn = document.getElementById('login-submit-btn');
-        const loginBackBtn = document.getElementById('login-back-btn');
-        const loginModalCloseBtn = document.getElementById('login-modal-close-btn');
-        const loginErrorMessage = document.getElementById('login-error-message');
-        const loginLoadingSpinner = document.getElementById('login-loading-spinner');
-
-        const profileSelectionModal = document.getElementById('profile-selection-modal');
-        const profileSelectionCloseBtn = document.getElementById('profile-selection-close-btn');
-        const profilesList = document.getElementById('profiles-list');
-        const noProfilesMessage = document.getElementById('no-profiles-message');
-        const createProfileBtn = document.getElementById('create-profile-btn');
-        const profileSelectionLoadingSpinner = document.getElementById('profile-selection-loading-spinner');
-
-        const createProfileModal = document.getElementById('create-profile-modal');
-        const createProfileCloseBtn = document.getElementById('create-profile-close-btn');
-        const newProfileNameInput = document.getElementById('new-profile-name');
-        const newProfilePinInput = document.getElementById('new-profile-pin');
-        const confirmNewProfilePinInput = document.getElementById('confirm-new-profile-pin');
-        const submitCreateProfileBtn = document.getElementById('submit-create-profile-btn');
-        const backToProfileSelectionBtn = document.getElementById('back-to-profile-selection-btn');
-        const createProfileErrorMessage = document.getElementById('create-profile-error-message');
-        const createProfileLoadingSpinner = document.getElementById('create-profile-loading-spinner');
-
-        const enterPinModal = document.getElementById('enter-pin-modal');
-        const enterPinCloseBtn = document.getElementById('enter-pin-close-btn');
-        const pinProfileNameDisplay = document.getElementById('pin-profile-name');
-        const pinInput = document.getElementById('pin-input');
-        const submitPinBtn = document.getElementById('submit-pin-btn');
-        const backFromPinBtn = document.getElementById('back-from-pin-btn');
-        const pinErrorMessage = document.getElementById('pin-error-message');
-        const pinLoadingSpinner = document.getElementById('pin-loading-spinner');
-
-        const mainDashboard = document.getElementById('main-dashboard');
-        const logoutBtn = document.getElementById('logout-btn');
-        const switchProfileBtn = document.getElementById('switch-profile-btn');
-        const userDisplayId = document.getElementById('user-display-id');
-        const currentProfileNameDisplay = document.getElementById('current-profile-name-display');
-
-        const oilChangeYesRadio = document.getElementById('oil-change-yes');
-        const oilChangeNoRadio = document.getElementById('oil-change-no');
-        const oilChangeInputContainer = document.getElementById('oil-change-input-container');
-        const inputOilChangeMoney = document.getElementById('input-oil-change-money');
-
-        const inputIncomePastTwoWeeks = document.getElementById('input-income-past-two-weeks');
-        const inputCarInsurance = document.getElementById('input-car-insurance');
-        const inputGasMoney = document.getElementById('input-gas-money');
-        const inputCreditCardDebt = document.getElementById('input-credit-card-debt');
-        const inputParking = document.getElementById('input-parking');
-        const inputCarWash = document.getElementById('input-car-wash');
-        const inputFunMoney = document.getElementById('input-fun-money');
-        const inputZimSupport = document.getElementById('input-zim-support');
-        const inputOffering = document.getElementById('input-offering');
-        const inputOtherCosts = document.getElementById('input-other-costs');
-
-        const saveFinancialDataBtn = document.getElementById('save-financial-data-btn');
-        const financialSaveMessage = document.getElementById('financial-save-message');
-
-        const displayIncomePastTwoWeeks = document.getElementById('display-income-past-two-weeks');
-        const displayCarInsurance = document.getElementById('display-car-insurance');
-        const displayGasMoney = document.getElementById('display-gas-money');
-        const displayCreditCardDebt = document.getElementById('display-credit-card-debt');
-        const displayOilChangeMoney = document.getElementById('display-oil-change-money');
-        const displayParking = document.getElementById('display-parking');
-        const displayCarWash = document.getElementById('display-car-wash');
-        const displayFunMoney = document.getElementById('display-fun-money');
-        const displayZimSupport = document.getElementById('display-zim-support');
-        const displayOffering = document.getElementById('display-offering');
-        const displayOtherCosts = document.getElementById('display-other-costs');
-        const displayDisposableIncome = document.getElementById('display-disposable-income');
-        const displayLastUpdated = document.getElementById('display-last-updated');
-
-        const researchAllocationBtn = document.getElementById('research-allocation-btn');
-        const allocationResultDiv = document.getElementById('allocation-result');
-        const allocationText = document.getElementById('allocation-text');
-        const researchLoadingSpinner = document.getElementById('research-loading-spinner');
-
-        const generalMessageBox = document.getElementById('general-message-box');
-        const generalMessageText = document.getElementById('general-message-text');
-        const firebaseConfigMessage = document.getElementById('firebase-config-message');
-
-        let selectedProfileForPin = null; // To store the profile being accessed for PIN entry
-
-        // --- Utility Functions ---
-
-        // Function to show custom message box
-        function showMessage(message) {
-            generalMessageText.textContent = message;
-            generalMessageBox.style.display = 'flex';
-        }
-
-        // Function to hide all main content screens
-        function hideAllScreens() {
-            initialContentWrapper.style.display = 'none';
-            loginModal.style.display = 'none';
-            profileSelectionModal.style.display = 'none';
-            createProfileModal.style.display = 'none';
-            enterPinModal.style.display = 'none';
-            mainDashboard.style.display = 'none';
-            console.log("UI: All main content screens hidden.");
-        }
-
-        // Function to display a specific screen
-        function showScreen(screenElement) {
-            hideAllScreens(); // Hide all first
-            if (screenElement.classList.contains('modal')) {
-                screenElement.style.display = 'flex';
-                console.log(`UI: Displaying modal: ${screenElement.id}`);
-            } else if (screenElement.classList.contains('content-card-style')) {
-                screenElement.style.display = 'block'; // Or 'flex' if you want its internal children to be flexed
-                console.log(`UI: Displaying content card: ${screenElement.id}`);
+        /**
+         * Hides the loading spinner next to the given button.
+         * @param {HTMLElement} button - The button element to hide the spinner from.
+         */
+        function hideButtonLoading(button) {
+            button.disabled = false;
+            const spinner = button.querySelector('.loader');
+            if (spinner) {
+                spinner.style.display = 'none';
             }
         }
 
-        // --- Firebase Initialization ---
-        function initializeFirebase() {
-            console.log("App Init: Initializing Firebase...");
-            if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-                console.error("App Init: Firebase config is empty or missing API Key. Cannot initialize Firebase.");
-                firebaseConfigMessage.style.display = 'block';
+        /**
+         * Displays a temporary success message.
+         * @param {HTMLElement} statusElement - The span element to display the message.
+         * @param {string} message - The message to display.
+         */
+        function showStatusMessage(statusElement, message, isSuccess = true) {
+            statusElement.textContent = message;
+            statusElement.classList.remove('hidden', isSuccess ? 'error-message' : 'success-message');
+            statusElement.classList.add(isSuccess ? 'success-message' : 'error-message');
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 3000); // Hide after 3 seconds
+        }
+
+        /**
+         * Displays an error message and highlights the input.
+         * @param {HTMLElement} inputElement - The input element to highlight.
+         * @param {HTMLElement} errorElement - The span element to display the error message.
+         * @param {string} message - The error message.
+         */
+        function showInputError(inputElement, errorElement, message) {
+            inputElement.classList.add('input-error');
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+
+        /**
+         * Clears an error message and removes input highlight.
+         * @param {HTMLElement} inputElement - The input element.
+         * @param {HTMLElement} errorElement - The error message span.
+         */
+        function clearInputError(inputElement, errorElement) {
+            inputElement.classList.remove('input-error');
+            errorElement.classList.add('hidden');
+            errorElement.textContent = '';
+        }
+
+        /**
+         * Displays a custom confirmation modal.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message to display.
+         * @param {function} onConfirm - Callback function to execute if confirmed.
+         */
+        function showConfirmationModal(title, message, onConfirm) {
+            confirmationModalTitle.textContent = title;
+            confirmationModalMessage.textContent = message;
+            confirmationCallback = onConfirm;
+            confirmationModal.style.display = 'flex';
+        }
+
+        /**
+         * Hides the confirmation modal.
+         */
+        function hideConfirmationModal() {
+            confirmationModal.style.display = 'none';
+            confirmationCallback = null;
+        }
+
+        /**
+         * Shows the rename expense modal.
+         * @param {string} expenseId - The ID of the expense to rename.
+         * @param {string} currentName - The current name of the expense.
+         */
+        function showRenameModal(expenseId, currentName) {
+            currentExpenseToRenameId = expenseId;
+            newExpenseNameInput.value = currentName;
+            clearInputError(newExpenseNameInput, renameExpenseError); // Clear previous errors
+            renameModal.style.display = 'flex';
+        }
+
+        /**
+         * Hides the rename expense modal.
+         */
+        function hideRenameModal() {
+            renameModal.style.display = 'none';
+            currentExpenseToRenameId = null;
+            newExpenseNameInput.value = '';
+            renameStatus.classList.add('hidden'); // Hide status message
+        }
+
+        /**
+         * Handles the confirmation of renaming an expense.
+         */
+        async function handleRenameConfirm() {
+            const newName = newExpenseNameInput.value.trim();
+            if (!newName) {
+                showInputError(newExpenseNameInput, renameExpenseError, 'Expense name cannot be empty.');
                 return;
             }
+            clearInputError(newExpenseNameInput, renameExpenseError);
+
+            if (currentExpenseToRenameId && newName) {
+                showButtonLoading(confirmRenameBtn);
+                try {
+                    await renameExpense(currentExpenseToRenameId, newName);
+                    showStatusMessage(renameStatus, 'Renamed!');
+                    setTimeout(hideRenameModal, 1000); // Hide after a short delay to show message
+                } catch (error) {
+                    console.error("Error renaming expense:", error);
+                    showStatusMessage(renameStatus, 'Rename failed!', false);
+                } finally {
+                    hideButtonLoading(confirmRenameBtn);
+                }
+            }
+        }
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
             try {
+                // No global loading overlay, individual section loading will handle feedback
                 app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
                 db = getFirestore(app);
-                setupAuthListener();
-                console.log("App Init: Firebase initialized successfully with provided config.");
-            } catch (error) {
-                console.error("App Init: Error initializing Firebase:", error);
-                showMessage("Failed to initialize Firebase. Please try again later.");
-                firebaseConfigMessage.style.display = 'flex'; // Show config message on error
-            }
-        }
+                auth = getAuth(app);
 
-        // --- Event Listeners ---
-        showLoginBtnInitial.addEventListener('click', () => {
-            console.log("Event: Initial Login button clicked. Showing login modal.");
-            showScreen(loginModal);
-            loginErrorMessage.classList.add('hidden'); // Clear previous errors
-            loginEmailInput.value = ''; // Clear inputs
-            loginPasswordInput.value = '';
-        });
-
-        loginBackBtn.addEventListener('click', () => {
-            console.log("Event: Login modal 'Go Back' button clicked. Showing initial content.");
-            showScreen(initialContentWrapper);
-        });
-
-        loginModalCloseBtn.addEventListener('click', () => {
-            console.log("Event: Login modal close button clicked. Showing initial content.");
-            showScreen(initialContentWrapper);
-        });
-
-        profileSelectionCloseBtn.addEventListener('click', handleLogout); // Log out from profile selection close button
-
-        createProfileCloseBtn.addEventListener('click', () => {
-            console.log("Event: Create profile modal close button clicked. Showing profile selection.");
-            showScreen(profileSelectionModal);
-            loadProfiles(); // Reload profiles when going back
-        });
-
-        enterPinCloseBtn.addEventListener('click', () => {
-            console.log("Event: Enter PIN modal close button clicked. Showing profile selection.");
-            showScreen(profileSelectionModal);
-            pinInput.value = ''; // Clear PIN input
-        });
-
-        // Event listener for Oil Change radio buttons
-        oilChangeYesRadio.addEventListener('change', () => {
-            if (oilChangeYesRadio.checked) {
-                oilChangeInputContainer.classList.remove('hidden');
-                console.log("UI: Oil change input container shown.");
-            }
-        });
-        oilChangeNoRadio.addEventListener('change', () => {
-            if (oilChangeNoRadio.checked) {
-                oilChangeInputContainer.classList.add('hidden');
-                inputOilChangeMoney.value = ''; // Clear value if not due
-                console.log("UI: Oil change input container hidden.");
-            }
-        });
-
-        loginSubmitBtn.addEventListener('click', handleLogin);
-        logoutBtn.addEventListener('click', handleLogout);
-        saveFinancialDataBtn.addEventListener('click', saveFinancialData);
-        researchAllocationBtn.addEventListener('click', researchAllocation);
-
-        createProfileBtn.addEventListener('click', () => {
-            console.log("Event: 'Create New Profile' button clicked. Showing create profile modal.");
-            showScreen(createProfileModal);
-            createProfileErrorMessage.classList.add('hidden');
-            newProfileNameInput.value = '';
-            newProfilePinInput.value = '';
-            confirmNewProfilePinInput.value = '';
-        });
-
-        submitCreateProfileBtn.addEventListener('click', handleCreateProfile);
-
-        backToProfileSelectionBtn.addEventListener('click', () => {
-            console.log("Event: 'Back to Profile Selection' button clicked. Showing profile selection.");
-            showScreen(profileSelectionModal);
-            loadProfiles(); // Reload profiles when going back
-        });
-
-        submitPinBtn.addEventListener('click', handlePinEntry);
-
-        backFromPinBtn.addEventListener('click', () => {
-            console.log("Event: 'Back from PIN' button clicked. Showing profile selection.");
-            showScreen(profileSelectionModal);
-            pinInput.value = ''; // Clear PIN input
-        });
-
-        switchProfileBtn.addEventListener('click', () => {
-            console.log("Event: 'Switch Profile' button clicked. Showing profile selection.");
-            currentProfileId = null; // Clear current profile
-            currentProfileName = null;
-            showScreen(profileSelectionModal);
-            loadProfiles(); // Reload profiles when switching
-        });
-
-        // --- Firebase Authentication and Firestore Logic ---
-
-        async function setupAuthListener() {
-            onAuthStateChanged(auth, async (user) => {
-                console.log("Auth State: onAuthStateChanged triggered. User:", user ? user.uid : "null");
-
-                if (user) {
-                    currentAuthUserId = user.uid;
-                    userDisplayId.textContent = `Family ID: ${PATRIARCH_FAMILY_ID}`;
-
-                    // If it's the first time auth state is ready AND no specific user signed in (e.g., initial load)
-                    if (!isAuthReady && !auth.currentUser) {
-                        console.log("Auth State: First auth state check, user already present. Proceeding to profile selection.");
-                        showScreen(profileSelectionModal);
-                        loadProfiles();
-                    } else if (isAuthReady && !currentProfileId) { // User just logged in via email/password, or switched family accounts
-                        console.log("Auth State: User just logged in or family changed. Proceeding to profile selection.");
-                        showScreen(profileSelectionModal);
-                        loadProfiles();
-                    } else if (currentProfileId && mainDashboard.style.display === 'none') {
-                        // User is already authenticated and a profile is selected, but dashboard isn't shown
-                        console.log("Auth State: User authenticated, profile selected. Showing dashboard.");
-                        showScreen(mainDashboard);
-                        setupFinancialDataListener(currentProfileId);
-                    }
-                    isAuthReady = true; // Auth state has been checked
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    // User is signed out
-                    console.log("Auth State: User is logged out. Showing initial content.");
-                    currentAuthUserId = null;
-                    currentProfileId = null;
-                    currentProfileName = null;
-                    showScreen(initialContentWrapper); // Always go back to initial screen on logout
-                    // Clear displayed profile name if any
-                    currentProfileNameDisplay.textContent = '';
-                }
-            });
-        }
-
-        async function handleLogin() {
-            const email = loginEmailInput.value;
-            const password = loginPasswordInput.value;
-
-            loginErrorMessage.classList.add('hidden');
-            loginLoadingSpinner.style.display = 'block';
-            console.log("Login Handler: Attempting login for email:", email);
-
-            if (!email || !password) {
-                loginErrorMessage.textContent = "Please enter both family email and password.";
-                loginErrorMessage.classList.remove('hidden');
-                loginLoadingSpinner.style.display = 'none';
-                console.log("Login Handler: Missing email or password.");
-                return;
-            }
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log("Login Handler: signInWithEmailAndPassword successful. UID:", userCredential.user.uid);
-                showMessage("Family login successful! Please select your profile.");
-                // The onAuthStateChanged listener will handle the UI transition to profile selection
-            } catch (error) {
-                console.error("Login Handler: Error during login:", error);
-                let errorMessage = "Login failed. Please check your family credentials.";
-
-                // Special handling for patriarch's initial setup
-                if (error.code === 'auth/user-not-found' && email === PATRIARCH_EMAIL && password === PATRIARCH_PASSWORD) {
-                    try {
-                        console.log("Login Handler: Patriarch user not found, attempting to create...");
-                        const userCredential = await createUserWithEmailAndPassword(auth, PATRIARCH_EMAIL, PATRIARCH_PASSWORD);
-                        // Also create the Firestore user document immediately after creation
-                        const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
-                        await setDoc(doc(db, `artifacts/${appId}/public/data/users`, userCredential.user.uid), {
-                            uid: userCredential.user.uid,
-                            email: PATRIARCH_EMAIL,
-                            role: 'patriarch',
-                            patriarchFamilyId: PATRIARCH_FAMILY_ID,
-                            createdAt: new Date()
-                        });
-                        console.log("Login Handler: Patriarch user created and logged in successfully.");
-                        showMessage("Patriarch account created and logged in! Please create your first profile.");
-                        // onAuthStateChanged listener will pick up this new login state and transition UI
-                    } catch (createError) {
-                        console.error("Login Handler: Error creating patriarch account:", createError);
-                        if (createError.code === 'auth/email-already-in-use') {
-                            errorMessage = "Patriarch account already exists. Please try logging in again.";
-                        } else if (createError.code === 'auth/weak-password') {
-                            errorMessage = "Patriarch password is too weak. (This should not happen with predefined password).";
-                        } else if (createError.code === 'auth/operation-not-allowed') {
-                            errorMessage = "Email/Password sign-up is not enabled for your Firebase project.";
-                        } else {
-                            errorMessage = `Failed to create patriarch account: ${createError.message}`;
-                        }
-                    }
-                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    errorMessage = "Invalid family email or password.";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = "Invalid email format.";
-                } else if (error.code === 'auth/operation-not-allowed') {
-                    errorMessage = "Email/Password sign-in is not enabled for your Firebase project.";
-                }
-                loginErrorMessage.textContent = errorMessage;
-                loginErrorMessage.classList.remove('hidden');
-            } finally {
-                loginLoadingSpinner.style.display = 'none';
-            }
-        }
-
-        async function handleLogout() {
-            console.log("Logout Handler: Attempting logout.");
-            try {
-                await signOut(auth);
-                showMessage("Logged out successfully.");
-                console.log("Logout Handler: signOut successful.");
-                // UI update handled by onAuthStateChanged listener
-            } catch (error) {
-                console.error("Logout Handler: Error during logout:", error);
-                showMessage("Failed to log out. Please try again.");
-            }
-        }
-
-        // --- Profile Management Functions ---
-        async function loadProfiles() {
-            if (!currentAuthUserId) {
-                console.warn("Load Profiles: Cannot load profiles: No authenticated family user ID.");
-                profileSelectionLoadingSpinner.style.display = 'none';
-                return;
-            }
-
-            profileSelectionLoadingSpinner.style.display = 'block';
-            profilesList.innerHTML = ''; // Clear existing list
-            noProfilesMessage.classList.add('hidden'); // Hide "no profiles" message initially
-            console.log("Load Profiles: Loading profiles for ownerAuthUid:", currentAuthUserId);
-
-            try {
-                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
-                const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`), where("ownerAuthUid", "==", currentAuthUserId));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    noProfilesMessage.classList.remove('hidden');
-                    console.log("Load Profiles: No profiles found for this family account.");
-                } else {
-                    console.log("Load Profiles: Profiles found:", querySnapshot.docs.length);
-                    querySnapshot.forEach((doc) => {
-                        const profileData = doc.data();
-                        const profileCard = document.createElement('div');
-                        profileCard.className = 'profile-card';
-                        profileCard.dataset.profileId = doc.id;
-                        profileCard.dataset.profileName = profileData.name;
-                        profileCard.innerHTML = `
-                            <h3 class="text-xl font-semibold text-gray-800">${profileData.name}</h3>
-                            <p class="text-gray-600">${profileData.isPatriarchProfile ? 'Patriarch Profile' : 'Family Member'}</p>
-                        `;
-                        profileCard.addEventListener('click', () => {
-                            selectedProfileForPin = { id: doc.id, name: profileData.name, pinHash: profileData.pinHash };
-                            pinProfileNameDisplay.textContent = profileData.name;
-                            console.log("Load Profiles: Profile selected for PIN entry:", profileData.name);
-                            showScreen(enterPinModal);
-                            pinInput.value = ''; // Clear previous PIN
-                            pinErrorMessage.classList.add('hidden');
-                        });
-                        profilesList.appendChild(profileCard);
-                        console.log(`Load Profiles: Appended profile card for: ${profileData.name}`);
-                    });
-                }
-            } catch (error) {
-                console.error("Load Profiles: Error loading profiles:", error);
-                showMessage("Failed to load family profiles.");
-            } finally {
-                profileSelectionLoadingSpinner.style.display = 'none';
-                console.log("Load Profiles: Profile loading complete.");
-            }
-        }
-
-        async function handleCreateProfile() {
-            const profileName = newProfileNameInput.value.trim();
-            const pin = newProfilePinInput.value.trim();
-            const confirmPin = confirmNewProfilePinInput.value.trim();
-
-            createProfileErrorMessage.classList.add('hidden');
-            createProfileLoadingSpinner.style.display = 'block';
-            console.log("Create Profile Handler: Attempting to create profile:", profileName);
-
-            if (!profileName || !pin || !confirmPin) {
-                createProfileErrorMessage.textContent = "Please fill in all fields.";
-                createProfileErrorMessage.classList.remove('hidden');
-                createProfileLoadingSpinner.style.display = 'none';
-                console.log("Create Profile Handler: Missing profile name, PIN, or confirm PIN.");
-                return;
-            }
-            if (pin.length !== 4 || !/^\d+$/.test(pin)) {
-                createProfileErrorMessage.textContent = "PIN must be a 4-digit number.";
-                createProfileErrorMessage.classList.remove('hidden');
-                createProfileLoadingSpinner.style.display = 'none';
-                console.log("Create Profile Handler: Invalid PIN format.");
-                return;
-            }
-            if (pin !== confirmPin) {
-                createProfileErrorMessage.textContent = "PINs do not match.";
-                createProfileErrorMessage.classList.remove('hidden');
-                createProfileLoadingSpinner.style.display = 'none';
-                console.log("Create Profile Handler: PINs do not match.");
-                return;
-            }
-            if (!currentAuthUserId) {
-                createProfileErrorMessage.textContent = "Authentication error. Please re-login.";
-                createProfileErrorMessage.classList.remove('hidden');
-                createProfileLoadingSpinner.style.display = 'none';
-                console.log("Create Profile Handler: No current authenticated user ID.");
-                return;
-            }
-
-            try {
-                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
-                // Check if a profile with this name already exists for this family
-                const q = query(collection(db, `artifacts/${appId}/public/data/familyProfiles`),
-                                where("ownerAuthUid", "==", currentAuthUserId),
-                                where("name", "==", profileName));
-                const existingProfiles = await getDocs(q);
-                if (!existingProfiles.empty) {
-                    createProfileErrorMessage.textContent = "A profile with this name already exists.";
-                    createProfileErrorMessage.classList.remove('hidden');
-                    createProfileLoadingSpinner.style.display = 'none';
-                    console.log("Create Profile Handler: Profile name already exists.");
-                    return;
+                    await signInAnonymously(auth);
                 }
 
-                const hashedPin = await hashPIN(pin);
-                const newProfileRef = doc(collection(db, `artifacts/${appId}/public/data/familyProfiles`)); // Firestore generates ID
-
-                await setDoc(newProfileRef, {
-                    name: profileName,
-                    pinHash: hashedPin,
-                    ownerAuthUid: currentAuthUserId, // Link to the single Firebase Auth user
-                    isPatriarchProfile: (profileName.toLowerCase() === 'patriarch'), // Mark patriarch profile
-                    createdAt: new Date(),
-                    // Initialize empty financial data for the new profile
-                    financialData: {
-                        incomePastTwoWeeks: 0,
-                        carInsurance: 0,
-                        gasMoney: 0,
-                        creditCardDebt: 0,
-                        oilChangeMoney: 0,
-                        parking: 0,
-                        carWash: 0,
-                        funMoney: 0,
-                        zimSupport: 0,
-                        offering: 0,
-                        otherCosts: 0,
-                        lastUpdated: null
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = userId;
+                        console.log('User signed in with UID:', userId);
+                        loadAllData();
+                    } else {
+                        console.log('No user signed in.');
+                        userIdDisplay.textContent = 'Not signed in';
+                        clearAllData();
                     }
                 });
-
-                showMessage(`Profile "${profileName}" created successfully!`);
-                showScreen(profileSelectionModal); // Go back to profile selection
-                loadProfiles(); // Reload profiles to show the new one
-                console.log("Create Profile Handler: Profile created successfully:", profileName);
             } catch (error) {
-                console.error("Create Profile Handler: Error creating profile:", error);
-                createProfileErrorMessage.textContent = `Failed to create profile: ${error.message}`;
-                createProfileErrorMessage.classList.remove('hidden');
-            } finally {
-                createProfileLoadingSpinner.style.display = 'none';
+                console.error("Error initializing Firebase or authenticating:", error);
+                userIdDisplay.textContent = 'Error loading user';
             }
         }
 
-        async function handlePinEntry() {
-            const enteredPin = pinInput.value.trim();
-            pinErrorMessage.classList.add('hidden');
-            pinLoadingSpinner.style.display = 'block';
-            console.log("PIN Entry Handler: Attempting PIN entry for profile:", pinProfileNameDisplay.textContent);
+        /**
+         * Clears all displayed data in the UI.
+         */
+        function clearAllData() {
+            biWeeklyIncome = 0;
+            monthlyExpenses = [];
+            randomExpenses = 0;
+            portfolioAllocation = { crypto: 0, stocks: 0, cashMutualFunds: 0 };
+            currentCashCushion = 0;
+            currentCryptoValue = 0;
+            currentStocksValue = 0;
+            currentCashMutualFundsValue = 0;
+            annualCryptoGrowthRate = 0;
+            annualStocksGrowthRate = 0;
+            annualCashMutualFundsGrowthRate = 0;
 
-            if (!enteredPin || enteredPin.length !== 4 || !/^\d+$/.test(enteredPin)) {
-                pinErrorMessage.textContent = "Please enter a valid 4-digit PIN.";
-                pinErrorMessage.classList.remove('hidden');
-                pinLoadingSpinner.style.display = 'none';
-                console.log("PIN Entry Handler: Invalid PIN format.");
-                return;
-            }
+            updateIncomeDisplay();
+            updateExpensesDisplay();
+            updateRandomExpensesDisplay();
+            updatePortfolioAllocationDisplay();
+            updateCashCushionDisplay();
+            updateAssetValuesDisplay();
+            updateGrowthRatesDisplay();
+            calculateAndDisplayNetIncome();
+            calculateAndDisplayNetWorth();
+            projectPortfolioValues();
 
-            if (!selectedProfileForPin) {
-                pinErrorMessage.textContent = "No profile selected.";
-                pinErrorMessage.classList.remove('hidden');
-                pinLoadingSpinner.style.display = 'none';
-                console.log("PIN Entry Handler: No profile selected for PIN entry.");
-                return;
-            }
-
-            try {
-                const hashedEnteredPin = await hashPIN(enteredPin);
-
-                if (hashedEnteredPin === selectedProfileForPin.pinHash) {
-                    currentProfileId = selectedProfileForPin.id;
-                    currentProfileName = selectedProfileForPin.name;
-                    showMessage(`Welcome, ${currentProfileName}!`);
-                    showScreen(mainDashboard); // Show dashboard
-                    currentProfileNameDisplay.textContent = currentProfileName; // Display the selected profile name
-                    setupFinancialDataListener(currentProfileId); // Start listening for this profile's financial data
-                    console.log("PIN Entry Handler: PIN entry successful. Dashboard loaded for profile:", currentProfileName);
-                } else {
-                    pinErrorMessage.textContent = "Incorrect PIN. Please try again.";
-                    pinErrorMessage.classList.remove('hidden');
-                    console.warn("PIN Entry Handler: Incorrect PIN entered.");
-                }
-            } catch (error) {
-                console.error("PIN Entry Handler: Error during PIN entry:", error);
-                pinErrorMessage.textContent = "An error occurred during PIN verification.";
-                pinErrorMessage.classList.remove('hidden');
-            } finally {
-                pinLoadingSpinner.style.display = 'none';
-            }
+            if (unsubscribeIncome) unsubscribeIncome();
+            if (unsubscribeExpenses) unsubscribeExpenses();
+            if (unsubscribeRandomExpenses) unsubscribeRandomExpenses();
+            if (unsubscribeAllocation) unsubscribeAllocation();
+            if (unsubscribeCashCushion) unsubscribeCashCushion();
+            if (unsubscribeAssetValues) unsubscribeAssetValues();
+            if (unsubscribeGrowthRates) unsubscribeGrowthRates();
         }
 
+        /**
+         * Loads all financial data from Firestore for the current user and data type.
+         */
+        function loadAllData() {
+            clearAllData();
 
-        // Firestore Listeners and Operations for Dashboard (now per profile)
-        function setupFinancialDataListener(profileId) {
-            if (!profileId) {
-                console.warn("Financial Data Listener: No profile ID available for financial data listener.");
-                return;
-            }
-            console.log("Financial Data Listener: Setting up financial data listener for profile ID:", profileId);
-            const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
-            // Financial data is now stored directly within the profile document
-            const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, profileId);
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data`);
 
-            onSnapshot(profileDocRef, (docSnap) => {
+            unsubscribeIncome = onSnapshot(doc(userDocRef, 'income', 'biWeekly'), (docSnap) => {
+                biWeeklyIncome = docSnap.exists() ? docSnap.data().amount || 0 : 0;
+                updateIncomeDisplay();
+                calculateAndDisplayNetIncome();
+            }, (error) => console.error("Error fetching income:", error));
+
+            unsubscribeExpenses = onSnapshot(collection(userDocRef, 'expenses'), (snapshot) => {
+                monthlyExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateExpensesDisplay();
+                calculateAndDisplayNetIncome();
+            }, (error) => console.error("Error fetching expenses:", error));
+
+            unsubscribeRandomExpenses = onSnapshot(doc(userDocRef, 'randomExpenses', 'current'), (docSnap) => {
+                randomExpenses = docSnap.exists() ? docSnap.data().amount || 0 : 0;
+                updateRandomExpensesDisplay();
+                calculateAndDisplayNetIncome();
+            }, (error) => console.error("Error fetching random expenses:", error));
+
+            unsubscribeAllocation = onSnapshot(doc(userDocRef, 'portfolioAllocation', 'current'), (docSnap) => {
+                portfolioAllocation = docSnap.exists() ? docSnap.data() : { crypto: 0, stocks: 0, cashMutualFunds: 0 };
+                updatePortfolioAllocationDisplay();
+            }, (error) => console.error("Error fetching portfolio allocation:", error));
+
+            unsubscribeCashCushion = onSnapshot(doc(userDocRef, 'cashCushion', 'current'), (docSnap) => {
+                currentCashCushion = docSnap.exists() ? docSnap.data().amount || 0 : 0;
+                updateCashCushionDisplay();
+                calculateAndDisplayNetWorth();
+            }, (error) => console.error("Error fetching cash cushion:", error));
+
+            unsubscribeAssetValues = onSnapshot(doc(userDocRef, 'assetValues', 'current'), (docSnap) => {
                 if (docSnap.exists()) {
-                    const profileData = docSnap.data();
-                    const data = profileData.financialData || {}; // Get financialData sub-object
-                    console.log("Financial Data Listener: Financial data received:", data);
-
-                    displayIncomePastTwoWeeks.textContent = (data.incomePastTwoWeeks || 0).toFixed(2);
-                    displayCarInsurance.textContent = (data.carInsurance || 0).toFixed(2);
-                    displayGasMoney.textContent = (data.gasMoney || 0).toFixed(2);
-                    displayCreditCardDebt.textContent = (data.creditCardDebt || 0).toFixed(2);
-                    displayOilChangeMoney.textContent = (data.oilChangeMoney || 0).toFixed(2);
-                    displayParking.textContent = (data.parking || 0).toFixed(2);
-                    displayCarWash.textContent = (data.carWash || 0).toFixed(2);
-                    displayFunMoney.textContent = (data.funMoney || 0).toFixed(2);
-                    displayZimSupport.textContent = (data.zimSupport || 0).toFixed(2);
-                    displayOffering.textContent = (data.offering || 0).toFixed(2);
-                    displayOtherCosts.textContent = (data.otherCosts || 0).toFixed(2);
-
-                    // Calculate disposable income
-                    const totalIncome = (data.incomePastTwoWeeks || 0);
-                    const totalCosts = (data.carInsurance || 0) + (data.gasMoney || 0) +
-                                       (data.oilChangeMoney || 0) + (data.parking || 0) +
-                                       (data.carWash || 0) + (data.funMoney || 0) +
-                                       (data.zimSupport || 0) + (data.offering || 0) +
-                                       (data.otherCosts || 0);
-                    const disposableIncome = totalIncome - totalCosts;
-                    displayDisposableIncome.textContent = disposableIncome.toFixed(2);
-
-
-                    displayLastUpdated.textContent = data.lastUpdated ? new Date(data.lastUpdated.toDate()).toLocaleString() : 'N/A';
-
-                    // Populate input fields if they are empty or for initial load
-                    inputIncomePastTwoWeeks.value = data.incomePastTwoWeeks || '';
-                    inputCarInsurance.value = data.carInsurance || '';
-                    inputGasMoney.value = data.gasMoney || '';
-                    inputCreditCardDebt.value = data.creditCardDebt || '';
-                    inputOilChangeMoney.value = data.oilChangeMoney || '';
-                    oilChangeInputContainer.classList.toggle('hidden', (data.oilChangeMoney || 0) === 0);
-                    oilChangeYesRadio.checked = (data.oilChangeMoney || 0) > 0;
-                    oilChangeNoRadio.checked = (data.oilChangeMoney || 0) === 0;
-
-                    inputParking.value = data.parking || '';
-                    inputCarWash.value = data.carWash || '';
-                    inputFunMoney.value = data.funMoney || '';
-                    inputZimSupport.value = data.zimSupport || '';
-                    inputOffering.value = data.offering || '';
-                    inputOtherCosts.value = data.otherCosts || '';
-
+                    const data = docSnap.data();
+                    currentCryptoValue = data.crypto || 0;
+                    currentStocksValue = data.stocks || 0;
+                    currentCashMutualFundsValue = data.cashMutualFunds || 0;
                 } else {
-                    console.warn("Financial Data Listener: Financial data for this profile does not exist. Initializing with zeros.");
-                    // Initialize with zeros if document doesn't exist or financialData is missing
-                    displayIncomePastTwoWeeks.textContent = '0.00';
-                    displayCarInsurance.textContent = '0.00';
-                    displayGasMoney.textContent = '0.00';
-                    displayCreditCardDebt.textContent = '0.00';
-                    displayOilChangeMoney.textContent = '0.00';
-                    displayParking.textContent = '0.00';
-                    displayCarWash.textContent = '0.00';
-                    displayFunMoney.textContent = '0.00';
-                    displayZimSupport.textContent = '0.00';
-                    displayOffering.textContent = '0.00';
-                    displayOtherCosts.textContent = '0.00';
-                    displayDisposableIncome.textContent = '0.00'; // Also initialize disposable income
-                    displayLastUpdated.textContent = 'N/A';
-
-                    inputIncomePastTwoWeeks.value = '';
-                    inputCarInsurance.value = '';
-                    inputGasMoney.value = '';
-                    inputCreditCardDebt.value = '';
-                    inputOilChangeMoney.value = '';
-                    oilChangeInputContainer.classList.add('hidden'); // Hide by default
-                    oilChangeNoRadio.checked = true; // Set 'No' as default
-                    oilChangeYesRadio.checked = false;
-
-                    inputParking.value = '';
-                    inputCarWash.value = '';
-                    inputFunMoney.value = '';
-                    inputZimSupport.value = '';
-                    inputOffering.value = '';
-                    inputOtherCosts.value = '';
+                    currentCryptoValue = 0;
+                    currentStocksValue = 0;
+                    currentCashMutualFundsValue = 0;
                 }
-            }, (error) => {
-                console.error("Financial Data Listener: Error listening to financial data:", error);
-                showMessage("Error loading financial data for profile.");
-            });
+                updateAssetValuesDisplay();
+                calculateAndDisplayNetWorth();
+                projectPortfolioValues();
+            }, (error) => console.error("Error fetching asset values:", error));
+
+            unsubscribeGrowthRates = onSnapshot(doc(userDocRef, 'growthRates', 'annual'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    annualCryptoGrowthRate = data.crypto || 0;
+                    annualStocksGrowthRate = data.stocks || 0;
+                    annualCashMutualFundsGrowthRate = data.cashMutualFunds || 0;
+                } else {
+                    annualCryptoGrowthRate = 0;
+                    annualStocksGrowthRate = 0;
+                    annualCashMutualFundsGrowthRate = 0;
+                }
+                updateGrowthRatesDisplay();
+                projectPortfolioValues();
+            }, (error) => console.error("Error fetching growth rates:", error));
         }
 
-        async function saveFinancialData() {
-            if (!currentProfileId) {
-                showMessage("Please select a profile to save data.");
+        /**
+         * Saves the bi-weekly income to Firestore.
+         */
+        async function saveBiWeeklyIncome() {
+            clearInputError(biWeeklyIncomeInput, incomeError);
+            const amount = parseFloat(biWeeklyIncomeInput.value);
+            if (isNaN(amount) || amount < 0) {
+                showInputError(biWeeklyIncomeInput, incomeError, "Please enter a valid positive number.");
                 return;
             }
-            console.log("Save Financial Data: Attempting to save financial data for profile ID:", currentProfileId);
-
-            const dataToSave = {
-                incomePastTwoWeeks: parseFloat(inputIncomePastTwoWeeks.value) || 0,
-                carInsurance: parseFloat(inputCarInsurance.value) || 0,
-                gasMoney: parseFloat(inputGasMoney.value) || 0,
-                creditCardDebt: parseFloat(inputCreditCardDebt.value) || 0,
-                oilChangeMoney: oilChangeYesRadio.checked ? (parseFloat(inputOilChangeMoney.value) || 0) : 0,
-                parking: parseFloat(inputParking.value) || 0,
-                carWash: parseFloat(inputCarWash.value) || 0,
-                funMoney: parseFloat(inputFunMoney.value) || 0,
-                zimSupport: parseFloat(inputZimSupport.value) || 0,
-                offering: parseFloat(inputOffering.value) || 0,
-                otherCosts: parseFloat(inputOtherCosts.value) || 0,
-                lastUpdated: new Date()
-            };
-
+            showButtonLoading(saveIncomeBtn);
             try {
-                const appId = firebaseConfig.appId.split(':')[2]; // Extract app ID for firestore path
-                // Update the financialData field within the specific profile document
-                const profileDocRef = doc(db, `artifacts/${appId}/public/data/familyProfiles`, currentProfileId);
-                await updateDoc(profileDocRef, { financialData: dataToSave });
-                financialSaveMessage.textContent = "Financial data saved successfully!";
-                financialSaveMessage.classList.remove('hidden');
-                financialSaveMessage.classList.add('text-green-600'); // Ensure green on success
-                financialSaveMessage.classList.remove('text-red-500'); // Remove red if previously error
-                setTimeout(() => financialSaveMessage.classList.add('hidden'), 3000);
-                console.log("Save Financial Data: Financial data saved successfully.");
+                const incomeDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/income`, 'biWeekly');
+                await setDoc(incomeDocRef, { amount: amount }, { merge: true });
+                biWeeklyIncomeInput.value = '';
+                showStatusMessage(incomeStatus, 'Saved!');
             } catch (error) {
-                console.error("Save Financial Data: Error saving financial data:", error);
-                financialSaveMessage.textContent = "Failed to save financial data.";
-                financialSaveMessage.classList.remove('hidden');
-                financialSaveMessage.classList.remove('text-green-600');
-                financialSaveMessage.classList.add('text-red-500');
-            }
-        }
-
-        // LLM Integration for Allocation Research
-        async function researchAllocation() {
-            const incomePastTwoWeeks = parseFloat(displayIncomePastTwoWeeks.textContent);
-            const carInsurance = parseFloat(displayCarInsurance.textContent);
-            const gasMoney = parseFloat(displayGasMoney.textContent);
-            const creditCardDebt = parseFloat(displayCreditCardDebt.textContent);
-            const oilChangeMoney = parseFloat(displayOilChangeMoney.textContent);
-            const parking = parseFloat(displayParking.textContent);
-            const carWash = parseFloat(displayCarWash.textContent);
-            const funMoney = parseFloat(displayFunMoney.textContent);
-            const zimSupport = parseFloat(displayZimSupport.textContent);
-            const offering = parseFloat(displayOffering.textContent);
-            const otherCosts = parseFloat(displayOtherCosts.textContent);
-            const disposableIncome = parseFloat(displayDisposableIncome.textContent);
-
-            if (isNaN(disposableIncome)) {
-                showMessage("Please ensure you have entered and saved your financial data first.");
-                return;
-            }
-
-            researchLoadingSpinner.style.display = 'block';
-            allocationResultDiv.classList.add('hidden');
-            allocationText.textContent = ''; // Clear previous result
-            console.log("Research Allocation: Initiating allocation research for profile:", currentProfileName);
-
-            const prompt = `
-                I am managing my family's finances for the profile "${currentProfileName}". Here are the current financial details:
-                - Income (Past 2 Weeks): $${incomePastTwoWeeks.toFixed(2)}
-                - Car Insurance: $${carInsurance.toFixed(2)}
-                - Gas Money: $${gasMoney.toFixed(2)}
-                - Current Credit Card Debt: $${creditCardDebt.toFixed(2)}
-                - Oil Change Money (if due): $${oilChangeMoney.toFixed(2)}
-                - Parking Costs: $${parking.toFixed(2)}
-                - Car Wash Money: $${carWash.toFixed(2)}
-                - Fun Money: $${funMoney.toFixed(2)}
-                - Zim Support: $${zimSupport.toFixed(2)}
-                - Offering: $${offering.toFixed(2)}
-                - Other Costs (e.g., Self Care): $${otherCosts.toFixed(2)}
-                - Calculated Disposable Income: $${disposableIncome.toFixed(2)}
-
-                Considering these figures, please provide a detailed financial allocation plan for the disposable income.
-                Suggest specific percentages or amounts for:
-                1. Debt repayment (prioritize credit card debt)
-                2. Savings (emergency fund, long-term goals)
-                3. Investments (diversification, growth)
-                4. Discretionary spending
-
-                For investments, specifically break down the allocation into:
-                - Cash
-                - Mutual Funds
-                - Crypto
-                - Stocks
-
-                Remember, we **cannot trade stable assets** (like stablecoins or other pegged assets) for investments. Focus on growth opportunities.
-
-                Provide actionable advice and explain the reasoning behind your recommendations.
-                Present the allocation plan in a clear, well-structured, and nicely formatted way, perhaps using bullet points or a table for the breakdown.
-                Focus on security and long-term financial health for a nuclear family.
-            `;
-
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = firebaseConfig.apiKey; // Use Firebase API key for Gemini
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    allocationText.textContent = text;
-                    allocationResultDiv.classList.remove('hidden');
-                    console.log("Research Allocation: Allocation advice received successfully.");
-                } else {
-                    showMessage("Failed to get allocation advice. No response from AI or unexpected format.");
-                    console.error("Research Allocation: LLM response structure unexpected:", result);
-                }
-            } catch (error) {
-                console.error("Research Allocation: Error calling LLM API:", error);
-                showMessage("Failed to get allocation advice. Network error or API issue.");
+                console.error("Error saving bi-weekly income:", error);
+                showStatusMessage(incomeStatus, 'Save failed!', false);
             } finally {
-                researchLoadingSpinner.style.display = 'none';
+                hideButtonLoading(saveIncomeBtn);
             }
         }
 
-        // Initialize Firebase when the window loads
-        window.onload = initializeFirebase;
+        /**
+         * Updates the displayed bi-weekly income.
+         */
+        function updateIncomeDisplay() {
+            currentBiWeeklyIncomeSpan.textContent = `$${biWeeklyIncome.toFixed(2)}`;
+        }
 
+        /**
+         * Adds a new monthly expense to Firestore.
+         */
+        async function addExpense() {
+            clearInputError(expenseNameInput, expenseNameError);
+            clearInputError(expenseAmountInput, expenseAmountError);
+
+            const name = expenseNameInput.value.trim();
+            const amount = parseFloat(expenseAmountInput.value);
+
+            let isValid = true;
+            if (!name) {
+                showInputError(expenseNameInput, expenseNameError, "Expense name cannot be empty.");
+                isValid = false;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                showInputError(expenseAmountInput, expenseAmountError, "Please enter a positive amount.");
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            showButtonLoading(addExpenseBtn);
+            try {
+                const expensesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`);
+                await addDoc(expensesCollectionRef, { name, amount });
+                expenseNameInput.value = '';
+                expenseAmountInput.value = '';
+                showStatusMessage(expenseStatus, 'Added!');
+            } catch (error) {
+                console.error("Error adding expense:", error);
+                showStatusMessage(expenseStatus, 'Add failed!', false);
+            } finally {
+                hideButtonLoading(addExpenseBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed list of monthly expenses and calculates totals.
+         */
+        function updateExpensesDisplay() {
+            expensesList.innerHTML = '';
+            let totalMonthly = 0;
+
+            if (monthlyExpenses.length === 0) {
+                noExpensesMessage.style.display = 'block';
+            } else {
+                noExpensesMessage.style.display = 'none';
+                monthlyExpenses.forEach(expense => {
+                    totalMonthly += expense.amount;
+                    const expenseItem = document.createElement('div');
+                    expenseItem.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-md shadow-sm';
+                    expenseItem.innerHTML = `
+                        <span class="text-gray-800 font-medium">${expense.name}: $${expense.amount.toFixed(2)}</span>
+                        <div class="space-x-2">
+                            <button data-id="${expense.id}" class="btn-secondary text-sm px-3 py-1 rename-expense-btn">Rename</button>
+                            <button data-id="${expense.id}" class="btn-danger text-sm px-3 py-1 remove-expense-btn">Remove</button>
+                        </div>
+                    `;
+                    expensesList.appendChild(expenseItem);
+                });
+            }
+
+            totalMonthlyExpensesSpan.textContent = `$${totalMonthly.toFixed(2)}`;
+            biWeeklyExpenseAllocationSpan.textContent = `$${(totalMonthly / 2).toFixed(2)}`;
+        }
+
+        /**
+         * Removes a monthly expense from Firestore.
+         * @param {string} expenseId - The ID of the expense to remove.
+         */
+        async function removeExpense(expenseId) {
+            showConfirmationModal(
+                "Confirm Deletion",
+                "Are you sure you want to remove this expense?",
+                async () => {
+                    try {
+                        // No specific button to show loading for, as it's a modal action
+                        const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
+                        await deleteDoc(expenseDocRef);
+                        console.log("Expense removed successfully.");
+                    } catch (error) {
+                        console.error("Error removing expense:", error);
+                        // Potentially show an error in the main expense section status
+                        showStatusMessage(expenseStatus, 'Removal failed!', false);
+                    } finally {
+                        hideConfirmationModal();
+                    }
+                }
+            );
+        }
+
+        /**
+         * Renames a monthly expense in Firestore.
+         * @param {string} expenseId - The ID of the expense to rename.
+         * @param {string} newName - The new name for the expense.
+         */
+        async function renameExpense(expenseId, newName) {
+            try {
+                const expenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/expenses`, expenseId);
+                await updateDoc(expenseDocRef, { name: newName });
+                console.log("Expense renamed successfully.");
+            } catch (error) {
+                throw error; // Re-throw to be caught by handleRenameConfirm
+            }
+        }
+
+        /**
+         * Adds a random expense amount to Firestore.
+         */
+        async function addRandomExpense() {
+            clearInputError(randomExpenseInput, randomExpenseError);
+            const amount = parseFloat(randomExpenseInput.value);
+            if (isNaN(amount) || amount < 0) {
+                showInputError(randomExpenseInput, randomExpenseError, "Please enter a valid positive number.");
+                return;
+            }
+            showButtonLoading(addRandomExpenseBtn);
+            try {
+                const randomExpenseDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/randomExpenses`, 'current');
+                const docSnap = await getDoc(randomExpenseDocRef);
+                const currentAmount = docSnap.exists() ? docSnap.data().amount : 0;
+                await setDoc(randomExpenseDocRef, { amount: currentAmount + amount }, { merge: true });
+                randomExpenseInput.value = '';
+                showStatusMessage(randomExpenseStatus, 'Added!');
+            } catch (error) {
+                console.error("Error adding random expense:", error);
+                showStatusMessage(randomExpenseStatus, 'Add failed!', false);
+            } finally {
+                hideButtonLoading(addRandomExpenseBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed random expenses.
+         */
+        function updateRandomExpensesDisplay() {
+            currentRandomExpensesSpan.textContent = `$${randomExpenses.toFixed(2)}`;
+        }
+
+        /**
+         * Calculates and displays the net income.
+         */
+        function calculateAndDisplayNetIncome() {
+            const totalMonthlyExpenses = monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const biWeeklyExpenseAllocation = totalMonthlyExpenses / 2;
+            const netIncome = biWeeklyIncome - biWeeklyExpenseAllocation - randomExpenses;
+            netIncomeSpan.textContent = `$${netIncome.toFixed(2)}`;
+        }
+
+        /**
+         * Saves the portfolio allocation percentages to Firestore.
+         */
+        async function savePortfolioAllocation() {
+            clearInputError(cryptoAllocationInput, cryptoAllocationError);
+            clearInputError(stocksAllocationInput, stocksAllocationError);
+            clearInputError(cashMutualFundsAllocationInput, cashMutualFundsAllocationError);
+            clearInputError(saveAllocationBtn, totalAllocationError); // Clear total error
+
+            const crypto = parseFloat(cryptoAllocationInput.value || 0);
+            const stocks = parseFloat(stocksAllocationInput.value || 0);
+            const cashMutualFunds = parseFloat(cashMutualFundsAllocationInput.value || 0);
+
+            let isValid = true;
+            if (isNaN(crypto) || crypto < 0 || crypto > 100) { showInputError(cryptoAllocationInput, cryptoAllocationError, "0-100%"); isValid = false; }
+            if (isNaN(stocks) || stocks < 0 || stocks > 100) { showInputError(stocksAllocationInput, stocksAllocationError, "0-100%"); isValid = false; }
+            if (isNaN(cashMutualFunds) || cashMutualFunds < 0 || cashMutualFunds > 100) { showInputError(cashMutualFundsAllocationInput, cashMutualFundsAllocationError, "0-100%"); isValid = false; }
+
+            const totalPercentage = crypto + stocks + cashMutualFunds;
+            if (totalPercentage !== 100) {
+                showInputError(saveAllocationBtn, totalAllocationError, "Total allocation must be 100%. Current: " + totalPercentage + "%");
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            showButtonLoading(saveAllocationBtn);
+            try {
+                const allocationDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/portfolioAllocation`, 'current');
+                await setDoc(allocationDocRef, { crypto, stocks, cashMutualFunds }, { merge: true });
+                showStatusMessage(allocationStatus, 'Saved!');
+            } catch (error) {
+                console.error("Error saving portfolio allocation:", error);
+                showStatusMessage(allocationStatus, 'Save failed!', false);
+            } finally {
+                hideButtonLoading(saveAllocationBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed portfolio allocation percentages.
+         */
+        function updatePortfolioAllocationDisplay() {
+            displayCryptoSpan.textContent = `${portfolioAllocation.crypto || 0}%`;
+            displayStocksSpan.textContent = `${portfolioAllocation.stocks || 0}%`;
+            displayCashMutualFundsSpan.textContent = `${portfolioAllocation.cashMutualFunds || 0}%`;
+
+            cryptoAllocationInput.value = portfolioAllocation.crypto || '';
+            stocksAllocationInput.value = portfolioAllocation.stocks || '';
+            cashMutualFundsAllocationInput.value = portfolioAllocation.cashMutualFunds || '';
+        }
+
+        /**
+         * Saves the current asset values to Firestore.
+         */
+        async function saveAssetValues() {
+            clearInputError(currentCryptoValueInput, currentCryptoValueError);
+            clearInputError(currentStocksValueInput, currentStocksValueError);
+            clearInputError(currentCashMutualFundsValueInput, currentCashMutualFundsValueError);
+
+            const crypto = parseFloat(currentCryptoValueInput.value || 0);
+            const stocks = parseFloat(currentStocksValueInput.value || 0);
+            const cashMutualFunds = parseFloat(currentCashMutualFundsValueInput.value || 0);
+
+            let isValid = true;
+            if (isNaN(crypto) || crypto < 0) { showInputError(currentCryptoValueInput, currentCryptoValueError, "Positive number required."); isValid = false; }
+            if (isNaN(stocks) || stocks < 0) { showInputError(currentStocksValueInput, currentStocksValueError, "Positive number required."); isValid = false; }
+            if (isNaN(cashMutualFunds) || cashMutualFunds < 0) { showInputError(currentCashMutualFundsValueInput, currentCashMutualFundsValueError, "Positive number required."); isValid = false; }
+            if (!isValid) return;
+
+            showButtonLoading(saveAssetValuesBtn);
+            try {
+                const assetValuesDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/assetValues`, 'current');
+                await setDoc(assetValuesDocRef, {
+                    crypto: crypto,
+                    stocks: stocks,
+                    cashMutualFunds: cashMutualFunds
+                }, { merge: true });
+                showStatusMessage(assetValuesStatus, 'Saved!');
+            } catch (error) {
+                console.error("Error saving asset values:", error);
+                showStatusMessage(assetValuesStatus, 'Save failed!', false);
+            } finally {
+                hideButtonLoading(saveAssetValuesBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed current asset values.
+         */
+        function updateAssetValuesDisplay() {
+            currentCryptoValueInput.value = currentCryptoValue;
+            currentStocksValueInput.value = currentStocksValue;
+            currentCashMutualFundsValueInput.value = currentCashMutualFundsValue;
+        }
+
+        /**
+         * Calculates and displays the total net worth.
+         */
+        function calculateAndDisplayNetWorth() {
+            const totalNetWorth = currentCashCushion + currentCryptoValue + currentStocksValue + currentCashMutualFundsValue;
+            totalNetWorthSpan.textContent = `$${totalNetWorth.toFixed(2)}`;
+        }
+
+        /**
+         * Saves the annual growth rates to Firestore.
+         */
+        async function saveGrowthRates() {
+            clearInputError(annualCryptoGrowthInput, annualCryptoGrowthError);
+            clearInputError(annualStocksGrowthInput, annualStocksGrowthError);
+            clearInputError(annualCashMutualFundsGrowthInput, annualCashMutualFundsGrowthError);
+
+            const crypto = parseFloat(annualCryptoGrowthInput.value || 0);
+            const stocks = parseFloat(annualStocksGrowthInput.value || 0);
+            const cashMutualFunds = parseFloat(annualCashMutualFundsGrowthInput.value || 0);
+
+            let isValid = true;
+            if (isNaN(crypto)) { showInputError(annualCryptoGrowthInput, annualCryptoGrowthError, "Number required."); isValid = false; }
+            if (isNaN(stocks)) { showInputError(annualStocksGrowthInput, annualStocksGrowthError, "Number required."); isValid = false; }
+            if (isNaN(cashMutualFunds)) { showInputError(annualCashMutualFundsGrowthInput, annualCashMutualFundsGrowthError, "Number required."); isValid = false; }
+            if (!isValid) return;
+
+            showButtonLoading(saveGrowthRatesBtn);
+            try {
+                const growthRatesDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/growthRates`, 'annual');
+                await setDoc(growthRatesDocRef, {
+                    crypto: crypto,
+                    stocks: stocks,
+                    cashMutualFunds: cashMutualFunds
+                }, { merge: true });
+                showStatusMessage(growthRatesStatus, 'Saved!');
+            } catch (error) {
+                console.error("Error saving growth rates:", error);
+                showStatusMessage(growthRatesStatus, 'Save failed!', false);
+            } finally {
+                hideButtonLoading(saveGrowthRatesBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed annual growth rates.
+         */
+        function updateGrowthRatesDisplay() {
+            annualCryptoGrowthInput.value = annualCryptoGrowthRate;
+            annualStocksGrowthInput.value = annualStocksGrowthRate;
+            annualCashMutualFundsGrowthInput.value = annualCashMutualFundsGrowthRate;
+        }
+
+        /**
+         * Projects the portfolio values based on current asset values and annual growth rates.
+         */
+        function projectPortfolioValues() {
+            const cryptoRate = 1 + (annualCryptoGrowthRate / 100);
+            const stocksRate = 1 + (annualStocksGrowthRate / 100);
+            const cashMutualFundsRate = 1 + (annualCashMutualFundsGrowthRate / 100);
+
+            const projectedCrypto1Year = currentCryptoValue * cryptoRate;
+            const projectedStocks1Year = currentStocksValue * stocksRate;
+            const projectedCashMutualFunds1Year = currentCashMutualFundsValue * cashMutualFundsRate;
+
+            const projectedCrypto3Years = currentCryptoValue * Math.pow(cryptoRate, 3);
+            const projectedStocks3Years = currentStocksValue * Math.pow(stocksRate, 3);
+            const projectedCashMutualFunds3Years = currentCashMutualFundsValue * Math.pow(cashMutualFundsRate, 3);
+
+            const projectedCrypto5Years = currentCryptoValue * Math.pow(cryptoRate, 5);
+            const projectedStocks5Years = currentStocksValue * Math.pow(stocksRate, 5);
+            const projectedCashMutualFunds5Years = currentCashMutualFundsValue * Math.pow(cashMutualFundsRate, 5);
+
+            const totalProjected1Year = projectedCrypto1Year + projectedStocks1Year + projectedCashMutualFunds1Year + currentCashCushion;
+            const totalProjected3Years = projectedCrypto3Years + projectedStocks3Years + projectedCashMutualFunds3Years + currentCashCushion;
+            const totalProjected5Years = projectedCrypto5Years + projectedStocks5Years + projectedCashMutualFunds5Years + currentCashCushion;
+
+            projected1YearSpan.textContent = `$${totalProjected1Year.toFixed(2)}`;
+            projected3YearsSpan.textContent = `$${totalProjected3Years.toFixed(2)}`;
+            projected5YearsSpan.textContent = `$${totalProjected5Years.toFixed(2)}`;
+        }
+
+        /**
+         * Updates the current cash cushion amount in Firestore.
+         */
+        async function updateCashCushion() {
+            clearInputError(currentCashCushionInput, cashCushionError);
+            const amount = parseFloat(currentCashCushionInput.value);
+            if (isNaN(amount) || amount < 0) {
+                showInputError(currentCashCushionInput, cashCushionError, "Please enter a valid positive number.");
+                return;
+            }
+            showButtonLoading(updateCashCushionBtn);
+            try {
+                const cashCushionDocRef = doc(db, `artifacts/${appId}/users/${userId}/${currentDataType}/data/cashCushion`, 'current');
+                await setDoc(cashCushionDocRef, { amount: amount }, { merge: true });
+                currentCashCushionInput.value = '';
+                showStatusMessage(cashCushionStatus, 'Updated!');
+            } catch (error) {
+                console.error("Error updating cash cushion:", error);
+                showStatusMessage(cashCushionStatus, 'Update failed!', false);
+            } finally {
+                hideButtonLoading(updateCashCushionBtn);
+            }
+        }
+
+        /**
+         * Updates the displayed cash cushion progress.
+         */
+        function updateCashCushionDisplay() {
+            displaySavedCashCushionSpan.textContent = `$${currentCashCushion.toFixed(2)}`;
+            const remaining = Math.max(0, CASH_CUSHION_TARGET - currentCashCushion);
+            displayRemainingCashCushionSpan.textContent = `$${remaining.toFixed(2)}`;
+
+            const progressPercentage = (currentCashCushion / CASH_CUSHION_TARGET) * 100;
+            cashCushionProgressBar.style.width = `${Math.min(100, progressPercentage).toFixed(2)}%`;
+            cashCushionProgressText.textContent = `${Math.min(100, progressPercentage).toFixed(0)}% of target achieved.`;
+        }
+
+        // Event Listeners
+        saveIncomeBtn.addEventListener('click', saveBiWeeklyIncome);
+        addExpenseBtn.addEventListener('click', addExpense);
+        addRandomExpenseBtn.addEventListener('click', addRandomExpense);
+        saveAllocationBtn.addEventListener('click', savePortfolioAllocation);
+        saveAssetValuesBtn.addEventListener('click', saveAssetValues);
+        saveGrowthRatesBtn.addEventListener('click', saveGrowthRates);
+        updateCashCushionBtn.addEventListener('click', updateCashCushion);
+
+        // Event delegation for dynamically added expense buttons
+        expensesList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-expense-btn')) {
+                const expenseId = event.target.dataset.id;
+                removeExpense(expenseId);
+            } else if (event.target.classList.contains('rename-expense-btn')) {
+                const expenseId = event.target.dataset.id;
+                const expenseItem = event.target.closest('.flex');
+                const currentName = expenseItem.querySelector('span').textContent.split(':')[0].trim();
+                showRenameModal(expenseId, currentName);
+            }
+        });
+
+        // Data Type Radio Button Change Listener
+        dataTypeRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                currentDataType = event.target.value;
+                console.log(`Switched to ${currentDataType} data.`);
+                loadAllData();
+            });
+        });
+
+        // Modal close buttons
+        closeRenameModalBtn.addEventListener('click', hideRenameModal);
+        confirmRenameBtn.addEventListener('click', handleRenameConfirm);
+
+        cancelConfirmBtn.addEventListener('click', hideConfirmationModal);
+        confirmActionBtn.addEventListener('click', () => {
+            if (confirmationCallback) {
+                confirmationCallback();
+            }
+        });
+
+        // Initialize Firebase on window load
+        window.onload = initializeFirebase;
     </script>
 </body>
 </html>
